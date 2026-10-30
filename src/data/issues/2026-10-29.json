@@ -49,7 +49,7 @@
       "title": "城市更新进入片区化阶段",
       "body": "重庆 18 个片区启动更新，涉及居民 12 万户。",
       "readMin": 5,
-      "to": "/issue/1/briefs?q=城市更新"
+      "to": "/report/a1029-10"
     },
     {
       "kind": "data",
@@ -69,7 +69,7 @@
         58
       ],
       "footnote": "自动结构化数据 · 置信度高",
-      "to": "/issue/1/briefs?q=服务消费"
+      "to": "/report/a1029-09"
     }
   ],
   "briefs": [
@@ -155,7 +155,7 @@
     }
   ],
   "analysis": {
-    "articleId": "a1029-06",
+    "articleId": "a1029-05",
     "label": "AI 辅助解读",
     "topic": "能源 · 机制",
     "title": "油价窗口临近：\n「应调」与「实调」之间差在哪",
