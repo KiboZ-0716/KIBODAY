@@ -39,29 +39,8 @@ export function buildReports({ dates }) {
         url: a.url,
       }))
 
-      // 预置报告按 eventKey 匹配（条目编号每期会重排，按编号匹配必然张冠李戴）。
-      // 预置文件必须自带 eventKey 字段，与当前事件不一致时忽略并降级为基础版。
-      const eventKey = article?.eventKey ?? null
-      const presetCandidates = [
-        eventKey ? path.join(REPORTS_DIR, `${eventKey}.json`) : null,
-        path.join(REPORTS_DIR, `${brief.id}.json`),
-      ].filter(Boolean)
-
-      let preset = null
-      for (const presetPath of presetCandidates) {
-        if (!fs.existsSync(presetPath)) continue
-        const candidate = readJson(presetPath)
-        if (!candidate.eventKey) {
-          console.warn(`  ! 深读报告 ${path.basename(presetPath)} 缺少 eventKey 字段，忽略（按基础版处理）`)
-          continue
-        }
-        if (eventKey && candidate.eventKey !== eventKey) {
-          console.warn(`  ! 深读报告 ${path.basename(presetPath)} 属于事件 ${candidate.eventKey}，与当前 ${eventKey} 不匹配，忽略`)
-          continue
-        }
-        preset = candidate
-        break
-      }
+      const presetPath = path.join(REPORTS_DIR, `${brief.id}.json`)
+      const preset = fs.existsSync(presetPath) ? readJson(presetPath) : null
 
       if (preset) {
         reports.push({

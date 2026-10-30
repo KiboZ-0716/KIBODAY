@@ -47,7 +47,7 @@ export function buildTopics({ issue, articles }) {
         tag: item.tag,
         title: item.title,
         summary: item.summary,
-        url: item.url ?? '',
+        url: '',
         sourceCount: 1,
         city: city.city,
         reports: [
@@ -56,7 +56,7 @@ export function buildTopics({ issue, articles }) {
             time: item.relTime,
             title: item.title,
             summary: item.summary,
-            url: item.url ?? '',
+            url: '',
           },
         ],
       })

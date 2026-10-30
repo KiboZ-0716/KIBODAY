@@ -44,7 +44,7 @@ async function main() {
       source: { ...source, merged, verified },
       brief,
       assets,
-      no: issueNo(date),
+      no: index + 1,
     })
 
     writeJson(path.join(ISSUE_DIR, `${date}.json`), issue)
@@ -63,8 +63,6 @@ async function main() {
   writeJson(path.join(ROOT, 'src', 'data', 'storylines.json'), storylines)
   buildReports({ dates })
   buildWeekly()
-  retain(path.join(CONTENT, 'raw'))
-  retain(path.join(CONTENT, 'briefs'))
   const all = listJson(ISSUE_DIR).map((f) => readJson(f))
   console.log(`\n✔ 完成：${all.length} 期在库，最新一期 NO.${String(all.length).padStart(3, '0')}`)
 }
@@ -92,35 +90,6 @@ function parseArgs(argv) {
       : listSnapshotDates().pop()
   }
   return out
-}
-
-// 期号一旦发布就不许变：快照按保留策略归档后，若按文件序号重新编号，
-// 会导致 /issue/N 链接与历史报告的 issueNo 全部漂移。这里用持久化索引固定期号。
-const INDEX_FILE = path.join(ROOT, 'content', 'issue-index.json')
-
-function issueNo(date) {
-  const index = fs.existsSync(INDEX_FILE) ? readJson(INDEX_FILE) : {}
-  if (!index[date]) {
-    const max = Object.values(index).reduce((a, b) => Math.max(a, b), 0)
-    const pending = [date, ...Object.keys(index)]
-      .filter((d) => !index[d])
-      .sort()
-    for (const d of pending) index[d] = max + 1
-    writeJson(INDEX_FILE, index)
-  }
-  return index[date]
-}
-
-// 保留策略：content/raw 与 content/briefs 只保留最近 7 期，更早的移入各自目录的 _archive/
-function retain(dir, keep = 7) {
-  const files = listJson(dir)
-  if (files.length <= keep) return
-  const archive = path.join(path.dirname(dir), '_archive')
-  fs.mkdirSync(archive, { recursive: true })
-  for (const f of files.slice(0, files.length - keep)) {
-    fs.renameSync(f, path.join(archive, path.basename(f)))
-    console.log(`  · 归档 ${path.relative(ROOT, f)}`)
-  }
 }
 
 main().catch((err) => {

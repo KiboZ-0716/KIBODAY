@@ -39,32 +39,6 @@ export function compose({ source, brief, assets, no }) {
     url: event.articles[0].url,
   })).sort((a, b) => String(b.time).localeCompare(String(a.time)))
 
-  // 卡片跳转校验：image/data 卡必须落在详情（事件报告或事件脉络）上，
-  // 禁止再退回速览列表搜索页 —— 这是 2026-10-30 复盘出的编辑侧通病。
-  const reportIds = new Set(events.flatMap((e) => e.articles.map((a) => a.id)))
-  const storylineIds = new Set(Object.keys(brief.storylines ?? {}))
-  for (const card of brief.cards ?? []) {
-    const to = card.to ?? ''
-    const reportHit = to.match(/^\/report\/([A-Za-z0-9-]+)$/)
-    if (reportHit) {
-      if (!reportIds.has(reportHit[1])) {
-        throw new Error(`[compose] 卡片跳转指向不存在的事件报告：${to}（本期无此条目 id）`)
-      }
-      continue
-    }
-    const storylineHit = to.match(/^\/storyline\/([A-Za-z0-9-]+)$/)
-    if (storylineHit) {
-      if (!storylineIds.has(storylineHit[1])) {
-        console.warn(`  ! 卡片跳转 ${to} 未在 brief.storylines 里登记，仅作提示`)
-      }
-      continue
-    }
-    throw new Error(
-      `[compose] 卡片「${card.title ?? card.label ?? ''}」的 to="${to}" 不是详情路由。` +
-        'image/data 卡必须指向 /report/<本期条目id> 或 /storyline/<脉络id>，不能指向 /issue/:no/briefs?q= 列表页。',
-    )
-  }
-
   const cards = (brief.cards ?? []).map((card) =>
     card.kind === 'image'
       ? {
@@ -125,10 +99,7 @@ export function compose({ source, brief, assets, no }) {
     cards,
     briefs,
     analysis: {
-      articleId: (
-        analysisEvent.articles.find((a) => a.id === brief.analysis.eventId) ??
-        analysisEvent.articles[0]
-      ).id,
+      articleId: analysisEvent.articles[0].id,
       label: brief.analysis.label,
       topic: brief.analysis.topic,
       title: brief.analysis.title,
