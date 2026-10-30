@@ -1,0 +1,27 @@
+/* 设计令牌：全部沿用原型取值，仅新增字体栈与少量扩展令牌 */
+:root {
+  --ink: #11110f;
+  --muted: #686861;
+  --paper: #f4f2ec;
+  --white: #fcfbf8;
+  --line: #d5d2c8;
+  --soft-line: #e5e2da;
+  --red: #d8412f;
+  --acid: #d5eb3d;
+  --blue: #214f78;
+  --green: #36a35a;
+
+  --font-serif: 'Noto Serif SC Variable', 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
+  --font-sans: 'Noto Sans SC Variable', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+
+  --shell: 1440px;
+  --gutter: 42px;
+  --topbar-h: 72px;
+}
+
+@media (max-width: 760px) {
+  :root {
+    --gutter: 18px;
+    --topbar-h: 62px;
+  }
+}

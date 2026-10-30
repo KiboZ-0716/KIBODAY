@@ -1,0 +1,380 @@
+{
+  "date": "2026-10-30",
+  "window": "00:00—09:30",
+  "fetchedAt": "2026-10-30T09:32:11+08:00",
+  "articles": [
+    {
+      "id": "a1030-01",
+      "title": "西班牙高铁事故初步报告：通信中断后人工调度未按规程接管",
+      "source": "央视新闻",
+      "publishedAt": "08:40",
+      "url": "https://news.cctv.com/2026/10/30/es-rail-report",
+      "summary": "初步报告确认，通信中断后人工调度未按规程接管列车运行，同一环节的安全机制连续失效。责任认定进入运营方与设备商的交叉区间。",
+      "tags": [
+        "国际",
+        "公共安全"
+      ],
+      "entities": [
+        "西班牙高铁",
+        "巴塞罗那",
+        "事故调查组"
+      ],
+      "image": "transit.jpg",
+      "imageCredit": "PHOTO · NICO RUGE / UNSPLASH",
+      "eventKey": "es-rail-1030"
+    },
+    {
+      "id": "a1030-02",
+      "title": "路透社：西班牙列车相撞事故调查指向系统性失误",
+      "source": "路透社",
+      "publishedAt": "09:05",
+      "url": "https://www.reuters.com/world/europe/es-rail-probe",
+      "summary": "三名接近调查的人士称，信号冗余设计未覆盖通信全断场景，调度权限边界在事发时并不清晰。",
+      "tags": [
+        "国际",
+        "公共安全"
+      ],
+      "entities": [
+        "西班牙高铁",
+        "巴塞罗那"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "es-rail-1030"
+    },
+    {
+      "id": "a1030-03",
+      "title": "西班牙交通部承诺公开事故全部调度录音",
+      "source": "El País",
+      "publishedAt": "07:52",
+      "url": "https://elpais.com/espana/2026-10-30/rail-audio",
+      "summary": "交通部表示将在初步报告发布后公开全部调度录音，国会要求就信号系统验收标准到场说明。",
+      "tags": [
+        "国际",
+        "公共安全"
+      ],
+      "entities": [
+        "西班牙高铁",
+        "事故调查组"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "es-rail-1030"
+    },
+    {
+      "id": "a1030-04",
+      "title": "环球时报：西班牙高铁事故初步报告公布，通信中断后调度未接管",
+      "source": "环球时报",
+      "publishedAt": "09:12",
+      "url": "https://world.huanqiu.com/article/es-rail",
+      "summary": "初步报告确认，通信中断后人工调度未按规程接管列车运行，同一环节的安全机制连续失效。责任认定进入运营方与设备商的交叉区间。",
+      "tags": [
+        "国际",
+        "公共安全"
+      ],
+      "entities": [
+        "西班牙高铁"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "es-rail-1030"
+    },
+    {
+      "id": "a1030-05",
+      "title": "青藏高原东部暴雪持续，三条国道实行分段管制",
+      "source": "应急管理部",
+      "publishedAt": "09:18",
+      "url": "https://www.mem.gov.cn/xw/yjgl/202610/t20261030_01.shtml",
+      "summary": "降雪中心区域积雪深度超过 20 厘米，三条国道分段管制，货运车辆限时通行，牧区通信与供电出现短时中断。",
+      "tags": [
+        "气候",
+        "交通"
+      ],
+      "entities": [
+        "青藏高原",
+        "国道管制"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "plateau-snow-1030"
+    },
+    {
+      "id": "a1030-06",
+      "title": "新华社：青藏高原强降雪进入第二轮，交通与牧区补给同步承压",
+      "source": "新华社",
+      "publishedAt": "08:55",
+      "url": "https://www.news.cn/2026-10/30/c_1129.htm",
+      "summary": "第二轮降雪过程叠加，应急管理部门调拨融雪剂与移动发电设备进入重点路段，牧区饲草补给启动空运。",
+      "tags": [
+        "气候",
+        "民生"
+      ],
+      "entities": [
+        "青藏高原"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "plateau-snow-1030"
+    },
+    {
+      "id": "a1030-07",
+      "title": "消费品以旧换新带动销售额超 2 万亿元",
+      "source": "新华社",
+      "publishedAt": "08:50",
+      "url": "https://www.news.cn/fortune/2026-10/30/c_1130.htm",
+      "summary": "商务部披露，以旧换新政策累计带动销售额突破 2 万亿元，汽车与家电占比超过七成，结构变化比总量更值得关注。",
+      "tags": [
+        "经济",
+        "民生"
+      ],
+      "entities": [
+        "以旧换新",
+        "商务部"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "trade-in-2t"
+    },
+    {
+      "id": "a1030-08",
+      "title": "以旧换新销售额破 2 万亿，汽车家电占比超七成",
+      "source": "经济日报",
+      "publishedAt": "08:12",
+      "url": "https://www.ce.cn/xwzx/gnsz/202610/30/t01.shtml",
+      "summary": "政策带动效应集中在耐用品换新，但补贴退坡后的需求可持续性仍需观察，家电回收体系是下一阶段瓶颈。",
+      "tags": [
+        "经济"
+      ],
+      "entities": [
+        "以旧换新",
+        "商务部"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "trade-in-2t"
+    },
+    {
+      "id": "a1030-09",
+      "title": "成品油调价窗口开启：汽油每吨上调 345 元，低于应调幅度",
+      "source": "国家发展改革委",
+      "publishedAt": "08:12",
+      "url": "https://www.ndrc.gov.cn/xwdt/xwfb/202610/t20261030.html",
+      "summary": "按机制测算应调 440 元/吨，实际调整 345 元/吨。发改委表示已充分考虑下游行业与民生成本承受能力。",
+      "tags": [
+        "能源",
+        "民生"
+      ],
+      "entities": [
+        "成品油调价",
+        "发改委"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "fuel-window-1030"
+    },
+    {
+      "id": "a1030-10",
+      "title": "油价「少涨」不等于降价：本轮调价的三重平衡",
+      "source": "第一财经",
+      "publishedAt": "07:40",
+      "url": "https://www.yicai.com/news/1026/1030oil.html",
+      "summary": "应调 440 元、实际 345 元，差额来自调控机制对国际油价波动的平滑处理。家用车单次加满约多支出 20 元。",
+      "tags": [
+        "能源",
+        "经济"
+      ],
+      "entities": [
+        "成品油调价"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "fuel-window-1030"
+    },
+    {
+      "id": "a1030-11",
+      "title": "渝万高铁进入联调联试，重点项目进度达年度计划 73.3%",
+      "source": "重庆日报",
+      "publishedAt": "08:30",
+      "url": "https://www.cqrb.cn/content/2026-10/30/content_01.htm",
+      "summary": "渝万高铁全线进入联调联试阶段，重庆市级重点项目年度投资完成率达到 73.3%，四季度进入冲刺窗口。",
+      "tags": [
+        "交通",
+        "产业"
+      ],
+      "entities": [
+        "渝万高铁",
+        "重庆"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "yuwang-hsr"
+    },
+    {
+      "id": "a1030-12",
+      "title": "重庆部署「渝邻共治」超大城市社区治理改革",
+      "source": "重庆发布",
+      "publishedAt": "07:56",
+      "url": "https://www.cq.gov.cn/zwgk/zfxxgkml/202610/t20261030.html",
+      "summary": "改革聚焦超大城市基层治理单元重构，首批试点覆盖中心城区 32 个街道，强调社区议事与物业服务联动。",
+      "tags": [
+        "民生",
+        "国内"
+      ],
+      "entities": [
+        "渝邻共治",
+        "重庆"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "yulin-community"
+    },
+    {
+      "id": "a1030-13",
+      "title": "65 起避险避灾案例获通报表扬，累计转移 3407 人",
+      "source": "应急管理部",
+      "publishedAt": "07:20",
+      "url": "https://www.mem.gov.cn/xw/yjgl/202610/t20261030_02.shtml",
+      "summary": "通报表扬的案例集中在西南与华南山区，成功避险主要依赖基层预警员在临界降雨前的主动转移。",
+      "tags": [
+        "公共安全",
+        "气候"
+      ],
+      "entities": [
+        "避险避灾",
+        "应急管理部"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "disaster-avoid"
+    },
+    {
+      "id": "a1030-14",
+      "title": "8 位在韩中国人民志愿军烈士身份确认",
+      "source": "央视新闻",
+      "publishedAt": "09:42",
+      "url": "https://news.cctv.com/2026/10/30/martyrs",
+      "summary": "退役军人事务部通过 DNA 比对确认第八批 8 位烈士身份，将在沈阳抗美援朝烈士陵园举行认亲仪式。",
+      "tags": [
+        "国内"
+      ],
+      "entities": [
+        "志愿军烈士",
+        "退役军人事务部"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "martyrs"
+    },
+    {
+      "id": "a1030-15",
+      "title": "秋粮收购进度过六成，主产区启动最低收购价预案",
+      "source": "农业农村部",
+      "publishedAt": "09:00",
+      "url": "https://www.moa.gov.cn/xw/zwdt/202610/t20261030.htm",
+      "summary": "全国秋粮收购进度达到 62%，东北产区局部启动最低收购价预案，稻谷品质受秋季连阴雨影响。",
+      "tags": [
+        "产业",
+        "民生"
+      ],
+      "entities": [
+        "秋粮收购",
+        "农业农村部"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "autumn-grain"
+    },
+    {
+      "id": "a1030-16",
+      "title": "前三季度港口集装箱吞吐量同比增长 6.4%",
+      "source": "交通运输部",
+      "publishedAt": "08:05",
+      "url": "https://www.mot.gov.cn/fenxigongbao/202610/t20261030.html",
+      "summary": "外贸集装箱航线加密带动吞吐量增长，宁波舟山、深圳港增速领先，空箱周转率同步回升。",
+      "tags": [
+        "经济",
+        "产业"
+      ],
+      "entities": [
+        "港口吞吐量",
+        "交通运输部"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "port-throughput"
+    },
+    {
+      "id": "a1030-17",
+      "title": "风电光伏装机突破 17 亿千瓦，消纳压力向下游传导",
+      "source": "国家能源局",
+      "publishedAt": "07:30",
+      "url": "https://www.nea.gov.cn/2026-10/30/c_1360.htm",
+      "summary": "新能源装机占比继续提升，西北地区弃风弃光率小幅反弹，储能配套与跨区输电成为下一阶段关键。",
+      "tags": [
+        "能源",
+        "产业"
+      ],
+      "entities": [
+        "新能源装机",
+        "国家能源局"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "renewable"
+    },
+    {
+      "id": "a1030-18",
+      "title": "央行开展 5000 亿元中期借贷便利操作，利率持平",
+      "source": "中国人民银行",
+      "publishedAt": "09:10",
+      "url": "https://www.pbc.gov.cn/goutongjiaoliu/113456/20261030.html",
+      "summary": "本月 MLF 等量续作，中标利率维持不变，市场解读为短期政策利率保持稳定。",
+      "tags": [
+        "经济"
+      ],
+      "entities": [
+        "中期借贷便利",
+        "央行"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "mlf"
+    },
+    {
+      "id": "a1030-19",
+      "title": "海南东部出现强降雨，部分市县发布暴雨红色预警",
+      "source": "海南日报",
+      "publishedAt": "06:20",
+      "url": "https://www.hinews.cn/news/2026103001.html",
+      "summary": "海南东部出现强降雨与内涝。",
+      "tags": [
+        "气候"
+      ],
+      "entities": [
+        "海南"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "hainan-rain"
+    },
+    {
+      "id": "a1030-20",
+      "title": "半导体设备出口管制清单再度调整，涉及三类刻蚀设备",
+      "source": "财新",
+      "publishedAt": "06:50",
+      "url": "https://www.caixin.com/2026-10-30/1026semiconductor.html",
+      "summary": "清单调整涉及三类刻蚀设备。",
+      "tags": [
+        "科技",
+        "产业"
+      ],
+      "entities": [
+        "半导体",
+        "出口管制"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "semi-export"
+    }
+  ]
+}

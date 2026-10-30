@@ -1,0 +1,11 @@
+{
+  "note": "线上抓取数据源。授权/版权以各站 RSS 条款为准；抓取器只取标题、时间、摘要与原文配图链接，不全文转载。",
+  "feeds": [
+    { "name": "新华社", "url": "https://www.news.cn/politics/news_politics.xml" },
+    { "name": "央视新闻", "url": "https://news.cctv.com/rss/china.xml" },
+    { "name": "国家发展改革委", "url": "https://www.ndrc.gov.cn/xwdt/xwfb/rss.xml" },
+    { "name": "应急管理部", "url": "https://www.mem.gov.cn/xw/yjgl/rss.xml" },
+    { "name": "交通运输部", "url": "https://www.mot.gov.cn/rss/news.xml" },
+    { "name": "国家统计局", "url": "https://www.stats.gov.cn/sj/zxfb/rss.xml" }
+  ]
+}

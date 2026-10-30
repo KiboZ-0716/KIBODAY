@@ -1,0 +1,7 @@
+@import '@fontsource-variable/noto-serif-sc';
+@import '@fontsource-variable/noto-sans-sc';
+@import './tokens.css';
+@import './reset.css';
+@import './app.css';
+@import './pages.css';
+@import './weekly.css';

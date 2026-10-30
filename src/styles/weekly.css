@@ -1,0 +1,748 @@
+/* ==========================================================================
+   AI 周报 —— 由原型 WeeklyPage / index.css 迁移
+   唯一改动：把原型 7—9px 的小字提升到 10—12px（可读性修正），
+   栅格与配色沿用原型取值。
+   ========================================================================== */
+
+/* ---------- 顶栏：刊物切换 ---------- */
+.publication-switch {
+  display: flex;
+  align-self: stretch;
+  margin-left: 42px;
+}
+
+.publication-switch a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.publication-switch a:hover {
+  color: var(--ink);
+}
+
+.publication-switch a.active {
+  color: var(--ink);
+}
+
+.publication-switch a.active::after {
+  content: '';
+  position: absolute;
+  right: 16px;
+  bottom: 0;
+  left: 16px;
+  height: 3px;
+  background: var(--red);
+}
+
+/* ---------- 报头 ---------- */
+.weekly-main {
+  padding-top: 44px;
+}
+
+.weekly-hero {
+  border-bottom: 1px solid var(--ink);
+}
+
+.weekly-issue {
+  color: var(--red);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.4px;
+}
+
+.weekly-hero-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 45px;
+  padding: 18px 0 30px;
+}
+
+.weekly-hero-row h1 {
+  margin: 0;
+  font: 900 clamp(44px, 5.6vw, 74px) / 1.06 var(--font-serif);
+  letter-spacing: -3px;
+}
+
+.weekly-hero-row > div:first-child p {
+  max-width: 590px;
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.weekly-meta {
+  text-align: right;
+  padding-bottom: 6px;
+}
+
+.weekly-meta span,
+.weekly-meta b,
+.weekly-meta small {
+  display: block;
+}
+
+.weekly-meta span {
+  font: 700 17px var(--font-serif);
+}
+
+.weekly-meta b {
+  margin: 8px 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.weekly-meta small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.weekly-thesis {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 30px;
+  align-items: start;
+  padding: 31px 0 35px;
+  border-top: 5px solid var(--ink);
+}
+
+.weekly-thesis span {
+  padding-top: 7px;
+  color: var(--red);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.weekly-thesis h2 {
+  max-width: 930px;
+  margin: 0;
+  font: 700 clamp(19px, 2.1vw, 26px) / 1.7 var(--font-serif);
+  letter-spacing: -0.7px;
+  text-wrap: balance;
+}
+
+/* ---------- 通用版块标题 ---------- */
+.weekly-section-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-top: 13px;
+  margin-bottom: 25px;
+  border-top: 3px solid var(--ink);
+}
+
+.weekly-section-title > span {
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.weekly-section-title h2 {
+  margin: 0;
+  font: 900 clamp(20px, 2vw, 24px) var(--font-serif);
+  letter-spacing: -0.8px;
+}
+
+.weekly-section-title small {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 1.6px;
+}
+
+/* ---------- 01 本周总览 ---------- */
+.weekly-overview {
+  padding: 54px 0 65px;
+}
+
+.weekly-overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.8fr);
+  gap: 44px;
+}
+
+.overview-copy > p {
+  margin: 0;
+  font: 500 16px / 2.05 var(--font-serif);
+}
+
+.weekly-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.weekly-chips span {
+  border: 1px solid var(--line);
+  background: var(--white);
+  padding: 5px 12px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.role-takeaway {
+  background: #e8e5db;
+  border-top: 3px solid var(--ink);
+  padding: 22px 24px;
+}
+
+.role-takeaway span {
+  color: var(--red);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.role-takeaway p {
+  margin: 13px 0 0;
+  font: 700 15px / 1.9 var(--font-serif);
+}
+
+.weekly-numbers {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 33px;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+
+.weekly-numbers div {
+  padding: 21px 20px;
+  border-right: 1px solid var(--line);
+}
+
+.weekly-numbers div:last-child {
+  border: 0;
+}
+
+.weekly-numbers b {
+  display: block;
+  color: var(--red);
+  font: 900 32px var(--font-serif);
+  line-height: 1;
+}
+
+.weekly-numbers span {
+  display: block;
+  max-width: 170px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+/* ---------- 版面 ---------- */
+.weekly-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 286px;
+  gap: 52px;
+  padding-bottom: 90px;
+  align-items: start;
+}
+
+.weekly-primary > section {
+  margin-bottom: 68px;
+}
+
+/* ---------- 02 重点深读 ---------- */
+.weekly-deep {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 18px;
+  padding: 29px 0 38px;
+  border-bottom: 1px solid var(--line);
+}
+
+.deep-number {
+  color: var(--red);
+  font: 800 22px var(--font-serif);
+}
+
+.deep-category {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 1.2px;
+}
+
+.deep-body > h3 {
+  max-width: 760px;
+  margin: 10px 0 20px;
+  font: 800 clamp(19px, 1.7vw, 23px) / 1.55 var(--font-serif);
+  letter-spacing: -0.5px;
+  text-wrap: balance;
+}
+
+.fact-analysis {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 34px;
+  padding: 22px 0;
+  border-top: 1px solid var(--soft-line);
+}
+
+.fact-analysis span,
+.role-grid span {
+  color: var(--red);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+}
+
+.fact-analysis p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+.role-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--line);
+}
+
+.role-grid > div {
+  padding: 18px;
+}
+
+.role-grid > div:first-child {
+  border-right: 1px solid var(--line);
+}
+
+.role-grid p {
+  margin: 7px 0 0;
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+.role-grid .action-box {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 95px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 10px;
+  background: var(--acid);
+  border-top: 1px solid var(--ink);
+}
+
+.role-grid .action-box span {
+  color: var(--ink);
+}
+
+.deep-sources {
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+  padding-top: 16px;
+}
+
+.deep-sources > span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+}
+
+.deep-sources > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+}
+
+.deep-sources a {
+  color: var(--blue);
+  font-size: 11px;
+  line-height: 1.7;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(33, 79, 120, 0.35);
+}
+
+.deep-sources a:hover {
+  color: var(--red);
+  border-bottom-color: var(--red);
+}
+
+/* ---------- 03 本周发布速览 ---------- */
+.ship-table {
+  border: 1px solid var(--ink);
+}
+
+.ship-head,
+.ship-row {
+  display: grid;
+  grid-template-columns: 1.1fr 0.55fr 2fr 0.45fr;
+  gap: 20px;
+  align-items: center;
+  padding: 12px 16px;
+}
+
+.ship-head {
+  background: var(--ink);
+  color: var(--white);
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+.ship-row {
+  min-height: 58px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ship-row:last-child {
+  border: 0;
+}
+
+.ship-row b {
+  font: 700 13px var(--font-serif);
+}
+
+.ship-row span,
+.ship-row p {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.ship-row p {
+  margin: 0;
+  line-height: 1.7;
+}
+
+.ship-row i {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--white);
+  font-size: 11px;
+  font-style: normal;
+}
+
+/* ---------- 04 趋势判断 ---------- */
+.trend-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.trend-grid article {
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--ink);
+  background: var(--white);
+  padding: 20px;
+}
+
+.trend-grid article > span {
+  color: var(--red);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.trend-grid h3 {
+  margin: 12px 0 9px;
+  font: 700 15px / 1.7 var(--font-serif);
+}
+
+.trend-grid p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.85;
+}
+
+/* ---------- 05 本周行动清单 ---------- */
+.checklist-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.checklist-grid > div {
+  border: 1px solid var(--ink);
+  border-top: 4px solid var(--red);
+  padding: 22px 25px;
+}
+
+.checklist-grid h3 {
+  margin: 0 0 14px;
+  font: 800 17px var(--font-serif);
+}
+
+.checklist-grid ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.checklist-grid li {
+  position: relative;
+  padding: 9px 0 9px 22px;
+  border-top: 1px solid var(--soft-line);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+.checklist-grid li::before {
+  content: '□';
+  position: absolute;
+  left: 0;
+  color: var(--red);
+}
+
+/* ---------- 侧栏：往期周报 ---------- */
+.weekly-sidebar {
+  position: sticky;
+  top: 98px;
+  scroll-margin-top: 98px;
+  border-top: 3px solid var(--ink);
+}
+
+.weekly-side-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 13px 0 15px;
+  border-bottom: 1px solid var(--ink);
+}
+
+.weekly-side-title span {
+  font: 800 19px var(--font-serif);
+}
+
+.weekly-side-title small {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+.weekly-archive-row {
+  display: block;
+  width: 100%;
+  padding: 15px 10px;
+  border-bottom: 1px solid var(--line);
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+}
+
+.weekly-archive-row:hover,
+.weekly-archive-row.current {
+  background: var(--white);
+}
+
+.weekly-archive-row.current {
+  border-left: 3px solid var(--red);
+  padding-left: 12px;
+}
+
+.weekly-archive-row span {
+  color: var(--red);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.weekly-archive-row small {
+  float: right;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.weekly-archive-row b {
+  display: block;
+  text-wrap: balance;
+  margin-top: 6px;
+  font: 700 13px / 1.65 var(--font-serif);
+  color: var(--ink);
+}
+
+.weekly-archive-more {
+  padding: 11px 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.weekly-method {
+  margin-top: 28px;
+  padding: 19px;
+  background: #e8e5db;
+  border-top: 3px solid var(--ink);
+}
+
+.weekly-method span {
+  color: var(--red);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.weekly-method p {
+  margin: 9px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.9;
+}
+
+.weekly-back-latest {
+  display: block;
+  margin-top: 18px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 3px;
+}
+
+.weekly-back-latest:hover {
+  color: var(--red);
+  border-bottom-color: var(--red);
+}
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 1024px) {
+  .weekly-overview-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .weekly-layout {
+    grid-template-columns: 1fr;
+    gap: 34px;
+  }
+
+  .weekly-sidebar {
+    position: static;
+  }
+
+  .trend-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .publication-switch {
+    margin-left: 14px;
+  }
+
+  .publication-switch a {
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
+  .publication-switch a.active::after {
+    right: 8px;
+    left: 8px;
+  }
+
+  /* 周报页的「往期周报」是主入口，移动端保留（日报的往期按钮仍隐藏） */
+  .edition-button.weekly-edition {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .edition-button.weekly-edition span {
+    margin-left: 5px;
+  }
+
+  .weekly-main {
+    padding-top: 30px;
+  }
+
+  .weekly-hero-row {
+    display: block;
+  }
+
+  .weekly-hero-row h1 {
+    font-size: 44px;
+    letter-spacing: -2.5px;
+  }
+
+  .weekly-meta {
+    margin-top: 25px;
+    text-align: left;
+  }
+
+  .weekly-thesis {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .weekly-numbers {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .weekly-numbers div:nth-child(2) {
+    border-right: 0;
+  }
+
+  .weekly-deep {
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .fact-analysis {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .role-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .role-grid > div:first-child {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .role-grid .action-box {
+    grid-column: 1;
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .deep-sources {
+    grid-template-columns: 1fr;
+  }
+
+  .ship-head {
+    display: none;
+  }
+
+  .ship-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 12px;
+    padding: 14px;
+  }
+
+  .ship-row p {
+    grid-column: 1 / -1;
+  }
+
+  .ship-row i {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .trend-grid,
+  .checklist-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .weekly-primary > section {
+    margin-bottom: 48px;
+  }
+}

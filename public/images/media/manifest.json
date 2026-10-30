@@ -1,0 +1,117 @@
+{
+  "city": {
+    "sourceMtime": 1793328284774.5576,
+    "source": "content\\images\\city.jpg",
+    "sizes": {
+      "lg": {
+        "width": 1400,
+        "height": 900,
+        "bytes": 131898
+      },
+      "md": {
+        "width": 760,
+        "height": 490,
+        "bytes": 54928
+      },
+      "sm": {
+        "width": 380,
+        "height": 245,
+        "bytes": 15098
+      }
+    },
+    "width": 1337,
+    "height": 932
+  },
+  "climate": {
+    "sourceMtime": 1793328284640.3464,
+    "source": "content\\images\\climate.jpg",
+    "sizes": {
+      "lg": {
+        "width": 1400,
+        "height": 900,
+        "bytes": 48728
+      },
+      "md": {
+        "width": 760,
+        "height": 490,
+        "bytes": 22614
+      },
+      "sm": {
+        "width": 380,
+        "height": 245,
+        "bytes": 6406
+      }
+    },
+    "width": 1400,
+    "height": 788
+  },
+  "energy": {
+    "sourceMtime": 1793328284698.4202,
+    "source": "content\\images\\energy.jpg",
+    "sizes": {
+      "lg": {
+        "width": 1400,
+        "height": 900,
+        "bytes": 79748
+      },
+      "md": {
+        "width": 760,
+        "height": 490,
+        "bytes": 29140
+      },
+      "sm": {
+        "width": 380,
+        "height": 245,
+        "bytes": 8214
+      }
+    },
+    "width": 1337,
+    "height": 932
+  },
+  "port": {
+    "sourceMtime": 1793328284850.629,
+    "source": "content\\images\\port.jpg",
+    "sizes": {
+      "lg": {
+        "width": 1400,
+        "height": 900,
+        "bytes": 123224
+      },
+      "md": {
+        "width": 760,
+        "height": 490,
+        "bytes": 44722
+      },
+      "sm": {
+        "width": 380,
+        "height": 245,
+        "bytes": 10080
+      }
+    },
+    "width": 1337,
+    "height": 932
+  },
+  "transit": {
+    "sourceMtime": 1793328284614.567,
+    "source": "content\\images\\transit.jpg",
+    "sizes": {
+      "lg": {
+        "width": 1400,
+        "height": 900,
+        "bytes": 69692
+      },
+      "md": {
+        "width": 760,
+        "height": 490,
+        "bytes": 24594
+      },
+      "sm": {
+        "width": 380,
+        "height": 245,
+        "bytes": 8706
+      }
+    },
+    "width": 1600,
+    "height": 1067
+  }
+}

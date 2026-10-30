@@ -1,0 +1,318 @@
+{
+  "date": "2026-10-29",
+  "window": "00:00—09:30",
+  "fetchedAt": "2026-10-29T09:31:48+08:00",
+  "articles": [
+    {
+      "id": "a1029-01",
+      "title": "青藏高原东部暴雪预警升级为橙色，多条通道临时管制",
+      "source": "应急管理部",
+      "publishedAt": "08:36",
+      "url": "https://www.mem.gov.cn/xw/yjgl/202610/t20261029_01.shtml",
+      "summary": "预计未来 24 小时降水强度进一步上升，三条国道实行分段管制，客运班线大面积停运，牧区启动饲草应急调运。",
+      "tags": [
+        "气候",
+        "交通"
+      ],
+      "entities": [
+        "青藏高原",
+        "国道管制"
+      ],
+      "image": "climate.jpg",
+      "imageCredit": "PHOTO · NASA / UNSPLASH",
+      "eventKey": "plateau-snow-1029"
+    },
+    {
+      "id": "a1029-02",
+      "title": "新华社：高原东部强降雪持续，交通部门增派除雪设备",
+      "source": "新华社",
+      "publishedAt": "07:58",
+      "url": "https://www.news.cn/2026-10/29/c_1128.htm",
+      "summary": "交通部门在重点路段增派除雪车与融雪剂撒布车，部分路段实行夜间禁行，货运车辆限时通行。",
+      "tags": [
+        "气候",
+        "交通"
+      ],
+      "entities": [
+        "青藏高原"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "plateau-snow-1029"
+    },
+    {
+      "id": "a1029-03",
+      "title": "高原牧区启动饲草应急调运，保障牲畜越冬",
+      "source": "央广网",
+      "publishedAt": "09:02",
+      "url": "https://www.cnr.cn/news/20261029/t01.shtml",
+      "summary": "牧区饲草储备缺口约三成，应急调运通过干线公路与空运并行，优先保障受灾最重的两个县。",
+      "tags": [
+        "气候",
+        "民生"
+      ],
+      "entities": [
+        "青藏高原"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "plateau-snow-1029"
+    },
+    {
+      "id": "a1029-04",
+      "title": "环球网：青藏高原东部暴雪预警升级为橙色，多条通道临时管制",
+      "source": "环球网",
+      "publishedAt": "08:50",
+      "url": "https://china.huanqiu.com/article/plateau-snow",
+      "summary": "预计未来 24 小时降水强度进一步上升，三条国道实行分段管制，客运班线大面积停运，牧区启动饲草应急调运。",
+      "tags": [
+        "气候"
+      ],
+      "entities": [
+        "青藏高原"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "plateau-snow-1029"
+    },
+    {
+      "id": "a1029-05",
+      "title": "原油变化率突破 4%，本轮成品油调价窗口基本确认",
+      "source": "国家发展改革委",
+      "publishedAt": "08:20",
+      "url": "https://www.ndrc.gov.cn/xwdt/xwfb/202610/t20261029.html",
+      "summary": "按当前原油变化率测算，本轮成品油应调幅度已进入调价红线区间，具体调幅将在窗口开启日公布。",
+      "tags": [
+        "能源",
+        "经济"
+      ],
+      "entities": [
+        "成品油调价",
+        "发改委"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "fuel-window-1029"
+    },
+    {
+      "id": "a1029-06",
+      "title": "机构测算：本轮油价上调幅度或低于机制应调值",
+      "source": "第一财经",
+      "publishedAt": "07:45",
+      "url": "https://www.yicai.com/news/1026/1029oil.html",
+      "summary": "多家机构测算应调幅度在 400 至 460 元/吨之间，但考虑到下游承受能力，实际调幅可能被平滑。",
+      "tags": [
+        "能源",
+        "经济"
+      ],
+      "entities": [
+        "成品油调价"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "fuel-window-1029"
+    },
+    {
+      "id": "a1029-07",
+      "title": "西班牙高铁相撞事故：调查重点转向通信中断后的处置流程",
+      "source": "El País",
+      "publishedAt": "07:52",
+      "url": "https://elpais.com/espana/2026-10-29/rail-probe",
+      "summary": "运营方公布事故前 25 分钟的三段调度通话录音，通信中断期间的值班安排成为调查焦点。",
+      "tags": [
+        "国际",
+        "公共安全"
+      ],
+      "entities": [
+        "西班牙高铁",
+        "巴塞罗那"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "es-rail-1029"
+    },
+    {
+      "id": "a1029-08",
+      "title": "路透社：西班牙列车相撞事故死亡人数上修，全国哀悼三天",
+      "source": "路透社",
+      "publishedAt": "09:05",
+      "url": "https://www.reuters.com/world/europe/es-rail",
+      "summary": "官方将死亡人数上修至 41 人，西班牙宣布全国哀悼三天，调查组承诺 48 小时内发布初步报告。",
+      "tags": [
+        "国际",
+        "公共安全"
+      ],
+      "entities": [
+        "西班牙高铁"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "es-rail-1029"
+    },
+    {
+      "id": "a1029-09",
+      "title": "9 月社会消费品零售总额同比增长 4.1%，服务消费快于商品",
+      "source": "商务部",
+      "publishedAt": "08:30",
+      "url": "https://www.mofcom.gov.cn/article/xwfb/202610/1029.shtml",
+      "summary": "服务零售额增速连续三个月高于商品零售，餐饮与文旅贡献主要增量，耐用品换新政策效应边际减弱。",
+      "tags": [
+        "经济",
+        "民生"
+      ],
+      "entities": [
+        "社会消费品零售",
+        "商务部"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "retail-sales"
+    },
+    {
+      "id": "a1029-10",
+      "title": "重庆启动中心城区 18 个片区城市更新，涉及居民 12 万户",
+      "source": "重庆日报",
+      "publishedAt": "08:10",
+      "url": "https://www.cqrb.cn/content/2026-10/29/content_01.htm",
+      "summary": "更新范围以老旧小区与城中村为主，强调保留街区肌理，首批项目年内开工。",
+      "tags": [
+        "民生",
+        "国内"
+      ],
+      "entities": [
+        "城市更新",
+        "重庆"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "urban-renewal"
+    },
+    {
+      "id": "a1029-11",
+      "title": "港口空箱周转率连续两月回升，外贸集装箱需求改善",
+      "source": "交通运输部",
+      "publishedAt": "07:25",
+      "url": "https://www.mot.gov.cn/fenxigongbao/202610/t20261029.html",
+      "summary": "主要枢纽港空箱周转率环比提升，欧美航线运价止跌，航运企业开始回补运力。",
+      "tags": [
+        "经济",
+        "产业"
+      ],
+      "entities": [
+        "港口吞吐量",
+        "交通运输部"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "port-empty"
+    },
+    {
+      "id": "a1029-12",
+      "title": "前 9 月规模以上工业企业利润同比增长 3.2%",
+      "source": "国家统计局",
+      "publishedAt": "09:00",
+      "url": "https://www.stats.gov.cn/sj/zxfb/202610/t20261029.html",
+      "summary": "装备制造业与高技术制造业利润增速领先，上游采矿业利润继续回落，行业分化明显。",
+      "tags": [
+        "经济",
+        "产业"
+      ],
+      "entities": [
+        "工业企业利润",
+        "国家统计局"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "industrial-profit"
+    },
+    {
+      "id": "a1029-13",
+      "title": "新一股冷空气自北向南影响中东部，多地降温超 8℃",
+      "source": "中国气象局",
+      "publishedAt": "06:40",
+      "url": "https://www.cma.gov.cn/2011xwzx/202610/t20261029.html",
+      "summary": "冷空气过程将持续三天，华北、黄淮出现 4 至 6 级偏北风，需关注对秋收收尾的影响。",
+      "tags": [
+        "气候"
+      ],
+      "entities": [
+        "冷空气",
+        "中国气象局"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "cold-front"
+    },
+    {
+      "id": "a1029-14",
+      "title": "新版国家医保药品目录公布，新增 91 种药品",
+      "source": "新华社",
+      "publishedAt": "08:15",
+      "url": "https://www.news.cn/politics/2026-10/29/c_1129.htm",
+      "summary": "新增药品以肿瘤、罕见病与慢性病为主，平均降价 53%，明年 1 月 1 日起执行。",
+      "tags": [
+        "民生",
+        "国内"
+      ],
+      "entities": [
+        "医保药品目录"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "medical-list"
+    },
+    {
+      "id": "a1029-15",
+      "title": "职业教育专业目录修订，新增 40 个新兴领域专业",
+      "source": "教育部",
+      "publishedAt": "07:10",
+      "url": "https://www.moe.gov.cn/jyb_xwfb/202610/t20261029.html",
+      "summary": "新增专业集中在智能制造、低空经济与养老照护领域，2027 年起招生。",
+      "tags": [
+        "民生",
+        "科技"
+      ],
+      "entities": [
+        "职业教育",
+        "教育部"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "vocational"
+    },
+    {
+      "id": "a1029-16",
+      "title": "国内团队实现 512 比特量子纠错码实验验证",
+      "source": "科技日报",
+      "publishedAt": "06:55",
+      "url": "https://digitalpaper.stdaily.com/20261029/01.html",
+      "summary": "实验完成，逻辑错误率低于物理错误率。",
+      "tags": [
+        "科技"
+      ],
+      "entities": [
+        "量子计算"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "quantum"
+    },
+    {
+      "id": "a1029-17",
+      "title": "某新能源车企被曝调整产能，涉及两个生产基地",
+      "source": "界面新闻",
+      "publishedAt": "06:30",
+      "url": "https://www.jiemian.com/article/2026102901.html",
+      "summary": "有员工称部分产线停工检修。",
+      "tags": [
+        "产业"
+      ],
+      "entities": [
+        "新能源汽车"
+      ],
+      "image": null,
+      "imageCredit": null,
+      "eventKey": "nev-capacity"
+    }
+  ]
+}
