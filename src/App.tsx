@@ -1,5 +1,4 @@
-import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { latestIssue } from '@/data'
+import { HashRouter, Route, Routes } from 'react-router-dom'
 import { UiProvider } from '@/lib/ui'
 import { PageShell } from '@/components/PageShell'
 import { getContentStatus } from '@/lib/livecontent'
@@ -20,7 +19,8 @@ export default function App() {
       <UiProvider>
         <ContentDebugBadge />
         <Routes>
-          <Route path="/" element={<Navigate to={`/issue/${latestIssue.no}`} replace />} />
+          {/* 首页直接渲染「今日」页：无参数时 TodayPage 自动取最新一期，
+              云端内容包到达并整体替换数据集后会随之更新 —— 打开网页永远看到最新一期 */}
           <Route path="/issue/:no" element={<TodayPage />} />
           <Route path="/issue/:no/briefs" element={<BriefsPage />} />
           <Route path="/issue/:no/analysis" element={<AnalysisPage />} />
