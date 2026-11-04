@@ -21,6 +21,7 @@ export default function App() {
         <Routes>
           {/* 首页直接渲染「今日」页：无参数时 TodayPage 自动取最新一期，
               云端内容包到达并整体替换数据集后会随之更新 —— 打开网页永远看到最新一期 */}
+          <Route path="/" element={<TodayPage />} />
           <Route path="/issue/:no" element={<TodayPage />} />
           <Route path="/issue/:no/briefs" element={<BriefsPage />} />
           <Route path="/issue/:no/analysis" element={<AnalysisPage />} />
