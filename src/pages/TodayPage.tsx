@@ -6,6 +6,7 @@ import { useUi } from '@/lib/ui'
 import { PageShell } from '@/components/PageShell'
 import { IssueHeader } from '@/components/IssueHeader'
 import { LeadBlock } from '@/components/LeadBlock'
+import { TopStoriesSection } from '@/components/TopStoriesSection'
 import { BriefsSection } from '@/components/BriefsSection'
 import { AnalysisSection } from '@/components/AnalysisSection'
 import { TimelineSection } from '@/components/TimelineSection'
@@ -27,6 +28,7 @@ export function TodayPage() {
     <PageShell title={`NO.${issue.no} ${issue.date}`} onEditionJump={scrollToArchive}>
       <IssueHeader issue={issue} onOpenMethod={() => openMethod(issue)} />
       <LeadBlock issue={issue} />
+      <TopStoriesSection issue={issue} />
 
       <div className="content-grid">
         <div className="main-column">

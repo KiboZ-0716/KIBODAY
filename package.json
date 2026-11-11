@@ -10,8 +10,13 @@
     "preview": "vite preview --port 4173",
     "issue": "node pipeline/run.mjs --all",
     "issue:today": "node pipeline/run.mjs",
+    "issue:append": "node pipeline/append.mjs",
+    "issue:weekly": "node pipeline/append.mjs --weekly-only",
     "shots": "node scripts/shot.mjs",
-    "push:content": "node scripts/push-content.mjs"
+    "bootstrap": "node scripts/bootstrap.mjs",
+    "enrich": "node scripts/enrich.mjs",
+    "push:content": "node scripts/push-content.mjs",
+    "push:bundle": "node scripts/push-bundle.mjs"
   },
   "dependencies": {
     "@fontsource-variable/noto-sans-sc": "^5.3.1",

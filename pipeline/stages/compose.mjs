@@ -28,7 +28,7 @@ export function compose({ source, brief, assets, no }) {
   })
 
   // 速览按发布时间倒序，最新在前；ranked 只决定入选集合，不决定展示顺序
-  const briefs = ranked.map((event) => ({
+  const allBriefs = ranked.map((event) => ({
     id: event.articles[0].id,
     time: event.time,
     tag: event.tag,
@@ -38,6 +38,15 @@ export function compose({ source, brief, assets, no }) {
     summary: trim(event.summary, 64),
     url: event.articles[0].url,
   })).sort((a, b) => String(b.time).localeCompare(String(a.time)))
+
+  // 「本期速览」与「与你有关」不重复：地区版已经展开过的条目，速览里不再出现
+  const regionalTitles = (brief.regional?.cities ?? []).flatMap((c) =>
+    (c.items ?? []).map((i) => normalizeTitle(i.title)),
+  ).filter(Boolean)
+  const briefs = allBriefs.filter((b) => {
+    const t = normalizeTitle(b.title)
+    return !regionalTitles.some((r) => titleDuplicate(r, t))
+  })
 
   const cards = (brief.cards ?? []).map((card) =>
     card.kind === 'image'
@@ -124,6 +133,27 @@ export function compose({ source, brief, assets, no }) {
     },
     regional: brief.regional,
   }
+}
+
+function normalizeTitle(text = '') {
+  return String(text).replace(/[\s\p{P}\p{S}]/gu, '')
+}
+
+/** 完全相同、互相包含，或二字词组重合度 > 0.72，都算同一条新闻 */
+function titleDuplicate(a, b) {
+  if (!a || !b) return false
+  if (a === b || a.includes(b) || b.includes(a)) return true
+  const g = (s) => {
+    const set = new Set()
+    for (let i = 0; i < s.length - 1; i += 1) set.add(s.slice(i, i + 2))
+    return set
+  }
+  const A = g(a)
+  const B = g(b)
+  if (!A.size || !B.size) return false
+  let hit = 0
+  for (const x of A) if (B.has(x)) hit += 1
+  return hit / Math.min(A.size, B.size) > 0.72
 }
 
 function mediaPath(assets, key, size) {

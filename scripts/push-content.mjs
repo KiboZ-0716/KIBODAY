@@ -2,6 +2,7 @@
 // 每日管线跑完后执行它，站点不用重新部署，读者刷新就能看到最新一期。
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
+import { enrichStorylines } from './enrich.mjs'
 
 const ROOT = process.cwd()
 const DATA = join(ROOT, 'src', 'data')
@@ -24,6 +25,10 @@ if (issues.length === 0) {
   console.error('src/data/issues 里没有任何一期，拒绝上传空包')
   process.exit(1)
 }
+
+// 上传前补齐所有专题：头条与三张重要卡片指向的 /storyline/:id 必须存在，
+// 否则读者点进去只会看到「没有这个专题」。补齐用当期真实素材生成深度时间线。
+enrichStorylines()
 
 const bundle = {
   version: 1,

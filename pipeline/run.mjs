@@ -12,6 +12,7 @@ import { buildAssets } from './stages/assets.mjs'
 import { buildReports } from './stages/report.mjs'
 import { buildTopics } from './stages/topics.mjs'
 import { buildWeekly } from './stages/weekly.mjs'
+import { enrichStorylines } from '../scripts/enrich.mjs'
 
 const args = parseArgs(process.argv.slice(2))
 const CONTENT = path.join(ROOT, 'content')
@@ -63,6 +64,7 @@ async function main() {
   writeJson(path.join(ROOT, 'src', 'data', 'storylines.json'), storylines)
   buildReports({ dates })
   buildWeekly()
+  enrichStorylines()
   const all = listJson(ISSUE_DIR).map((f) => readJson(f))
   console.log(`\n✔ 完成：${all.length} 期在库，最新一期 NO.${String(all.length).padStart(3, '0')}`)
 }

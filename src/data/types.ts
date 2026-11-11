@@ -177,6 +177,15 @@ export interface Storyline {
   image: string | null
   credit: string
   nodes: TimelineNode[]
+  /** 以下为深度专题扩展字段，由 scripts/enrich.mjs 自动生成 */
+  background?: string
+  concepts?: { term: string; explain: string }[]
+  keyNumbers?: { value: string; label: string }[]
+  impact?: string
+  whatNext?: string
+  sources?: string[]
+  updatedAt?: string
+  relatedDates?: string[]
 }
 
 export interface Issue {

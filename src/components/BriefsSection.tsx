@@ -3,8 +3,34 @@ import type { Issue } from '@/data'
 import { Icon } from './Icon'
 import { SectionHeading } from './Layout'
 
+const normalize = (s = '') => String(s).replace(/[\s\p{P}\p{S}]/gu, '')
+
+/** 完全相同、互相包含，或二字词组重合度 > 0.72，判为同一条新闻 */
+function duplicate(a: string, b: string) {
+  if (!a || !b) return false
+  if (a === b || a.includes(b) || b.includes(a)) return true
+  const g = (s: string) => {
+    const set = new Set<string>()
+    for (let i = 0; i < s.length - 1; i += 1) set.add(s.slice(i, i + 2))
+    return set
+  }
+  const A = g(a)
+  const B = g(b)
+  if (!A.size || !B.size) return false
+  let hit = 0
+  for (const x of A) if (B.has(x)) hit += 1
+  return hit / Math.min(A.size, B.size) > 0.72
+}
+
 export function BriefsSection({ issue, limit = 4 }: { issue: Issue; limit?: number }) {
-  const shown = issue.briefs.slice(0, limit)
+  // 「与你有关」已经展开的条目不再出现在「本期速览」，两个版块不重复
+  const regionalTitles = (issue.regional?.cities ?? []).flatMap((c) =>
+    (c.items ?? []).map((i) => normalize(i.title)),
+  )
+  const briefs = issue.briefs.filter(
+    (b) => !regionalTitles.some((r) => duplicate(r, normalize(b.title))),
+  )
+  const shown = briefs.slice(0, limit)
 
   return (
     <section className="section-block">
@@ -14,7 +40,7 @@ export function BriefsSection({ issue, limit = 4 }: { issue: Issue; limit?: numb
         en="DAILY BRIEFING"
         action={
           <Link to={`/issue/${issue.no}/briefs`}>
-            查看全部 {issue.briefs.length} 条 <Icon name="arrow" />
+            查看全部 {briefs.length} 条 <Icon name="arrow" />
           </Link>
         }
       />
