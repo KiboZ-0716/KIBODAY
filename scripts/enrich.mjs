@@ -114,45 +114,64 @@ function extractNumbers(text, label) {
   return found.slice(0, 2).map((value) => ({ value: value.trim(), label: clip(label, 34) }))
 }
 
+/** 纯日期、无单位的个位数不算「关键数字」 */
+function meaningfulNumber(value) {
+  const v = value.replace(/\s/g, '')
+  if (!/\d/.test(v)) return false
+  if (/^\d{1,2}$/.test(v)) return false
+  if (/^(?:19|20)\d{2}$/.test(v)) return false
+  return /[.%亿万元基点毫秒吨辆架枚条家天周月年人次平米平方米]|\d{3,}/.test(v)
+}
+
 function pickNumbers(m) {
   const a = m.analysis
-  const out = []
-  for (const x of a?.metrics ?? []) out.push({ value: String(x.value), label: String(x.label) })
+  const priority = []
+  const extra = []
+  for (const x of a?.metrics ?? []) priority.push({ value: String(x.value), label: String(x.label) })
   if (m.firstCard?.big) {
-    out.push({
+    priority.push({
       value: `${m.firstCard.big}${m.firstCard.unit ?? ''}`,
       label: m.firstCard.caption ?? m.firstCard.footnote ?? '本期关键数值',
     })
   }
-  for (const b of m.briefs.slice(0, 6)) out.push(...extractNumbers(`${b.summary} ${b.title}`, b.title))
-  for (const r of m.rpts.slice(0, 5)) {
-    for (const f of r.facts ?? []) out.push(...extractNumbers(f, r.title))
-    out.push(...extractNumbers(r.summary ?? '', r.title))
+  for (const b of m.briefs.slice(0, 8)) extra.push(...extractNumbers(`${b.summary} ${b.title}`, b.title))
+  for (const r of m.rpts.slice(0, 6)) {
+    for (const f of r.facts ?? []) extra.push(...extractNumbers(f, r.title))
+    extra.push(...extractNumbers(r.summary ?? '', r.title))
   }
   const seen = new Set()
-  return out.filter((x) => {
+  const keep = (x) => {
     const k = x.value.replace(/\s/g, '')
-    if (!k || seen.has(k)) return false
+    if (!k || seen.has(k) || !meaningfulNumber(x.value)) return false
     seen.add(k)
     return true
-  }).slice(0, 5)
+  }
+  const out = [...priority.filter(keep), ...extra.filter(keep)].slice(0, 5)
+  if (!out.length && m.briefs.length) {
+    out.push({ value: String(m.briefs.length), label: '本期相关报道条数' })
+  }
+  return out
 }
+
+const TEMPLATE_HEADING = /目前已知的|为什么这里是基础版|这条事件还没有|需要完整版|同期共有|时间跨度/
 
 function pickConcepts(m) {
   const a = m.analysis
   const out = []
   for (const s of (a?.sections ?? []).slice(0, 4)) {
-    out.push({ term: s.heading, explain: (s.paragraphs ?? []).join(' ') })
+    if (s.heading && !TEMPLATE_HEADING.test(s.heading)) {
+      out.push({ term: s.heading, explain: (s.paragraphs ?? []).join(' ') })
+    }
   }
   for (const r of m.rpts.slice(0, 4)) {
     for (const s of r.sections ?? []) {
-      if (s.heading && !/基础版|为什么这里是/.test(s.heading)) {
+      if (s.heading && !TEMPLATE_HEADING.test(s.heading)) {
         out.push({ term: s.heading, explain: (s.paragraphs ?? []).join(' ') })
       }
     }
   }
-  for (const b of m.briefs.slice(0, 4)) {
-    out.push({ term: flat(b.title).slice(0, 18), explain: `${b.source}：${b.summary}` })
+  for (const b of m.briefs.slice(0, 5)) {
+    out.push({ term: flat(b.title).slice(0, 22), explain: `${b.source}：${b.summary}` })
   }
   const seen = new Set()
   return out
@@ -199,12 +218,14 @@ function buildNodes(ref, m) {
   // 二、前因：为什么偏偏是现在
   const bg = [
     sections.length ? `${sections[0].heading}：${paragraphsOf(sections[0])}` : '',
-    reportSections.length ? `${reportSections[0].heading}：${paragraphsOf(reportSections[0])}` : '',
+    ...reportSections.slice(0, 3).map((s) => `${s.heading}：${paragraphsOf(s)}`),
     a?.body,
-    ...m.briefs.slice(0, 3).map((b) => `${b.title}：${b.summary}`),
-    ...m.rpts.slice(0, 2).map((r) => `${r.title}：${flat(r.summary)}`),
+    m.newest.synthesis,
+    ...m.briefs.slice(0, 6).map((b) => `${b.title}：${b.summary}`),
+    ...m.rpts.slice(0, 4).map((r) => `${r.title}：${flat(r.summary)}`),
+    ...(m.newest.trends ?? []).slice(0, 2).map((t) => `${t.title}：${t.body}`),
   ]
-  nodes.push({ time: '前因 · 背景', title: '为什么偏偏是现在', body: clip(uniq(bg).join(' '), 700) })
+  nodes.push({ time: '前因 · 背景', title: '为什么偏偏是现在', body: clip(uniq(bg).join(' '), 950) })
 
   // 三、关键数字
   nodes.push({
