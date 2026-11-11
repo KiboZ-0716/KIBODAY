@@ -13,8 +13,8 @@ export function RegionalSection({ issue }: { issue: Issue }) {
     <section className="regional">
       <SectionHeading
         index="04"
-        title="与你有关"
-        en="REGIONAL WATCH"
+        title="属地新闻"
+        en="LOCAL DESK"
         action={
           <div className="region-tabs" role="tablist" aria-label="选择地区">
             {regional.cities.map((option) => (
@@ -37,12 +37,13 @@ export function RegionalSection({ issue }: { issue: Issue }) {
           <article key={item.id}>
             <span>{item.tag}</span>
             <h3>{item.title}</h3>
+            {item.summary && <p className="region-summary">{item.summary}</p>}
             <div className="region-foot">
               <p>
                 {item.source} · {item.relTime}
               </p>
               {item.id && (
-                <Link className="region-dig" to={`/report/${item.id}`}>
+                <Link className="region-dig" to={`/report/${item.id}`} title="由模型撰写这条属地事件的完整专题">
                   深挖
                   <Icon name="arrow" />
                 </Link>

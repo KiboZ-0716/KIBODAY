@@ -34,6 +34,18 @@ export function ReportPage() {
     async (topicId: string) => {
       const target = getTopic(topicId)
       if (!target) return
+
+      // 浏览器实时调用受「发布域名 ↔ 凭据」绑定限制；出刊环节已由模型
+      // 真调写好完整专题。这里优先载入出刊模型稿，保证按钮永远有内容、不报错。
+      if (!isDeepDiveReady()) {
+        const preset = presetReport(topicId)
+        if (preset) {
+          setReport(preset)
+          setStatus('done')
+          setError('')
+        }
+        return
+      }
       controllerRef.current?.abort()
       const controller = new AbortController()
       controllerRef.current = controller
@@ -117,22 +129,18 @@ export function ReportPage() {
               {isGenerating
                 ? '正在调用模型深挖'
                 : status === 'error'
-                  ? '深挖失败'
+                  ? '专题暂时拉取失败'
                   : report?.from === 'preset'
-                    ? '出刊模型撰稿 · 完整专题分析'
+                    ? '完整专题分析 · 模型撰稿'
                     : '模型实时生成'}
             </b>
-            {!isDeepDiveReady() ? (
-              <span style={{ fontSize: 11, opacity: 0.65 }}>
-                实时重写需开通模型通道 · 当前为出刊模型撰稿
-              </span>
-            ) : isGenerating ? (
+            {isGenerating ? (
               <button className="gen-stop" onClick={() => controllerRef.current?.abort()}>
                 停止
               </button>
             ) : (
               <button className="gen-run" onClick={() => run(id)} disabled={isGenerating}>
-                {report ? '重新深挖' : '开始深挖'}
+                {isDeepDiveReady() ? '重新深挖' : '重读完整专题'}
               </button>
             )}
           </div>
@@ -278,10 +286,10 @@ export function ReportPage() {
       </div>
 
       <p className="report-footnote">
-        本报告由出刊时的模型按 {reportMetaInfo.promptPath}（{reportMetaInfo.promptId}{' '}
-        {reportMetaInfo.promptVersion}）写成完整专题分析：前因、机制、带口径的数字、影响与下一步分开写，
-        判断句以「判断：」开头，事实与判断不混。
-        当前发布域名未开通实时模型通道，因此不提供「重新深挖」；开通后可在浏览器里重新调用模型重写，结果保存在本机。
+        这份专题由出刊环节调用模型按 {reportMetaInfo.promptPath}（{reportMetaInfo.promptId}{' '}
+        {reportMetaInfo.promptVersion}）撰写：前因、机制、带口径的数字、影响与下一步分开写，
+        判断句以「判断：」开头，事实与判断不混。每天出刊时模型会为当期事件重新撰写，
+        点开即为最新一版的模型产物，不需要在浏览器里等待生成。
       </p>
     </PageShell>
   )

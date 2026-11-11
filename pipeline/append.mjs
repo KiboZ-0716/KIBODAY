@@ -19,6 +19,7 @@ import { buildReports } from './stages/report.mjs'
 import { buildTopics } from './stages/topics.mjs'
 import { buildWeekly } from './stages/weekly.mjs'
 import { enrichStorylines } from '../scripts/enrich.mjs'
+import { generateDeepReports } from '../scripts/deepgen.mjs'
 
 const CONTENT = path.join(ROOT, 'content')
 const ISSUE_DIR = path.join(ROOT, 'src', 'data', 'issues')
@@ -76,6 +77,12 @@ async function main() {
     writeJson(path.join(ROOT, 'src', 'data', 'topics.json'), {
       topics: [...newTopics, ...oldTopics.filter((t) => t.date !== date)],
     })
+
+    // 深挖专题：出刊时真调模型，为当期所有可深挖条目（速览 + 属地）写完整专题。
+    // 浏览器端实时调用受发布域名凭据 Origin 校验限制（403），所以把「调用模型」
+    // 放在这一步：模型产物落 content/deep/{id}.json，读者点「深挖」直接看到。
+    // 单条失败/超时自动降级保留已有稿，不影响整期出刊。
+    await generateDeepReports({ date, concurrency: 3 })
 
     // 事件报告：buildReports 会整体覆盖，调用后把历史报告合并回来
     const oldReports = readJson(path.join(ROOT, 'src', 'data', 'reports.json'), { reports: [] }).reports ?? []

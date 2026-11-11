@@ -5,9 +5,9 @@ import { SectionHeading } from './Layout'
 import { MediaImage } from './MediaImage'
 
 /**
- * 首页「今日重点」：一个模块里放 1 个最重要的头条 + 3 件次重要的事。
+ * 首页「今日重点」：一个模块里放 1 个最重要的头条（单独大图）+ 3 件次重要的事。
  * 四条全部按重要性挑、与题材无关，且都指向模型撰写的完整专题。
- * 头条与三张卡各自使用不同主题配图。
+ * 配图按「日期 + 标题」确定性从免版权图池选 4 张互不相同的图，每期不重复。
  */
 export function TopStoriesSection({ issue }: { issue: Issue }) {
   const { lead } = issue
@@ -27,7 +27,7 @@ export function TopStoriesSection({ issue }: { issue: Issue }) {
         <Link className="top-lead" to={leadTo}>
           {lead.image && (
             <div className="top-lead-media">
-              <MediaImage src={lead.image} alt={lead.title.replace(/\n/g, '')} sizes="(max-width: 900px) 100vw, 42vw" priority />
+              <MediaImage src={lead.image} alt={String(lead.title).replace(/\n/g, '')} sizes="(max-width: 900px) 100vw, 100%" priority />
               <div className="image-credit">{lead.credit}</div>
             </div>
           )}

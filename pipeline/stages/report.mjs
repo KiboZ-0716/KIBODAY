@@ -28,17 +28,29 @@ export function buildReports({ dates }) {
     const rawPath = path.join(CONTENT, 'raw', `${date}.json`)
     const raw = fs.existsSync(rawPath) ? readJson(rawPath) : { articles: [] }
 
-    for (const brief of issue.briefs) {
-      const article = raw.articles.find((a) => a.id === brief.id)
+    // 可深挖条目 = 本期速览 + 属地新闻。属地条目没有同源报道，用其自身信源构造 sources。
+    const entries = [
+      ...issue.briefs.map((b) => ({ ...b, _kind: 'brief' })),
+      ...(issue.regional?.cities ?? []).flatMap((c) =>
+        (c.items ?? []).map((i) => ({ ...i, _kind: 'regional', city: c.city })),
+      ),
+    ]
+
+    for (const brief of entries) {
+      const article = brief._kind === 'brief'
+        ? raw.articles.find((a) => a.id === brief.id)
+        : null
       const peers = article?.eventKey
         ? raw.articles.filter((a) => a.eventKey === article.eventKey)
         : [article].filter(Boolean)
 
-      const sources = peers.map((a) => ({
-        name: a.source,
-        time: a.publishedAt,
-        url: a.url,
-      }))
+      const sources = brief._kind === 'regional'
+        ? [{ name: brief.source, time: brief.relTime, url: '' }]
+        : peers.map((a) => ({
+            name: a.source,
+            time: a.publishedAt,
+            url: a.url,
+          }))
 
       // 深挖正文由出刊时的模型按 content/prompts/deep-story.md 撰写，
       // 优先读 content/deep/{briefId}.json；旧版 content/reports 作兼容。
@@ -69,9 +81,12 @@ export function buildReports({ dates }) {
             level: 'deep',
             promptId: PROMPT_ID,
             promptVersion: PROMPT_VERSION,
-            model: '出刊模型按 deep-story 规范撰写',
-            generatedAt: issue.generatedAt,
-            note: '由模型按 content/prompts/deep-story.md 写成完整专题分析，非脚本拼贴；事实与判断分开，数字带口径。',
+            // 深挖专题由 scripts/deepgen.mjs 在出刊时真调模型生成，展示真实模型名
+            model: preset._meta?.model
+              ? `${preset._meta.model} · 出刊时调用模型撰写`
+              : '出刊模型按 deep-story 规范撰写',
+            generatedAt: preset._meta?.at ?? issue.generatedAt,
+            note: '由模型在出刊环节按 content/prompts/deep-story.md 写成完整专题分析，非脚本拼贴；事实与判断分开，数字带口径。',
           },
         })
         continue

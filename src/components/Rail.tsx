@@ -4,28 +4,6 @@ import { Icon } from './Icon'
 export function Rail({ issue, onOpenMethod }: { issue: Issue; onOpenMethod: () => void }) {
   return (
     <aside className="rail">
-      <section className="rail-section watch-section">
-        <div className="rail-title">
-          <span>接下来看什么</span>
-          <b>WHAT TO WATCH</b>
-        </div>
-        <p className="rail-intro">不给分数。下面每条只说清两件事：正在发生什么，以及哪天该回来核对哪个数。</p>
-
-        {issue.trends.map((trend, index) => (
-          <div className="watch-item" key={trend.title}>
-            <div className="watch-head">
-              <span>{String(index + 1).padStart(2, '0')}</span>
-              <h3>{trend.title}</h3>
-            </div>
-            <p>{trend.body}</p>
-            <div className="watch-next">
-              <b>下一个观察点</b>
-              <span>{trend.watch ?? '关注后续官方披露与实施公告'}</span>
-            </div>
-          </div>
-        ))}
-      </section>
-
       <section className="rail-section sources">
         <div className="rail-title">
           <span>信源矩阵</span>

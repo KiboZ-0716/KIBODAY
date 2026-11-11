@@ -7,7 +7,6 @@ import { PageShell } from '@/components/PageShell'
 import { IssueHeader } from '@/components/IssueHeader'
 import { TopStoriesSection } from '@/components/TopStoriesSection'
 import { BriefsSection } from '@/components/BriefsSection'
-import { AnalysisSection } from '@/components/AnalysisSection'
 import { TimelineSection } from '@/components/TimelineSection'
 import { Rail } from '@/components/Rail'
 import { RegionalSection } from '@/components/RegionalSection'
@@ -31,7 +30,6 @@ export function TodayPage() {
       <div className="content-grid">
         <div className="main-column">
           <BriefsSection issue={issue} />
-          <AnalysisSection issue={issue} />
           <TimelineSection issue={issue} />
         </div>
         <Rail issue={issue} onOpenMethod={() => openMethod(issue)} />
