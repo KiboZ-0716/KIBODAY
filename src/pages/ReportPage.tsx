@@ -9,6 +9,7 @@ import {
   readCachedReport,
   writeCachedReport,
 } from '@/lib/deepdive'
+import { isDeepDiveReady } from '@/lib/cloud'
 
 type Status = 'ready' | 'generating' | 'done' | 'error'
 
@@ -118,10 +119,14 @@ export function ReportPage() {
                 : status === 'error'
                   ? '深挖失败'
                   : report?.from === 'preset'
-                    ? '构建期预生成 · 可随时重新深挖'
+                    ? '出刊模型撰稿 · 完整专题分析'
                     : '模型实时生成'}
             </b>
-            {isGenerating ? (
+            {!isDeepDiveReady() ? (
+              <span style={{ fontSize: 11, opacity: 0.65 }}>
+                实时重写需开通模型通道 · 当前为出刊模型撰稿
+              </span>
+            ) : isGenerating ? (
               <button className="gen-stop" onClick={() => controllerRef.current?.abort()}>
                 停止
               </button>
@@ -273,10 +278,10 @@ export function ReportPage() {
       </div>
 
       <p className="report-footnote">
-        点击「重新深挖」会重新调用模型，按提示词 {reportMetaInfo.promptId}{' '}
-        {reportMetaInfo.promptVersion}（{reportMetaInfo.promptPath}）重写本报告；
-        结果保存在本机浏览器，换个设备会重新生成一次。
-        结论以同源报道为依据，模型判断部分在文中以「判断：」标注。
+        本报告由出刊时的模型按 {reportMetaInfo.promptPath}（{reportMetaInfo.promptId}{' '}
+        {reportMetaInfo.promptVersion}）写成完整专题分析：前因、机制、带口径的数字、影响与下一步分开写，
+        判断句以「判断：」开头，事实与判断不混。
+        当前发布域名未开通实时模型通道，因此不提供「重新深挖」；开通后可在浏览器里重新调用模型重写，结果保存在本机。
       </p>
     </PageShell>
   )
