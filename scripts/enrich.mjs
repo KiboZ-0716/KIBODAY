@@ -110,8 +110,8 @@ const NUMBER_RE = /(\d+(?:\.\d+)?\s*(?:%|个百分点|基点|bp|万亿|亿美元
 
 function extractNumbers(text, label) {
   const t = flat(text)
-  const found = t.match(NUMBER_RE) ?? []
-  return found.slice(0, 2).map((value) => ({ value: value.trim(), label: clip(label, 34) }))
+  const found = [...t.matchAll(NUMBER_RE)].map((m) => m[1].trim())
+  return found.filter(meaningfulNumber).slice(0, 3).map((value) => ({ value, label: clip(label, 34) }))
 }
 
 /** 纯日期、无单位的个位数不算「关键数字」 */
