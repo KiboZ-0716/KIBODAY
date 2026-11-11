@@ -69,7 +69,27 @@ export function buildReports({ dates }) {
         continue
       }
 
-      const times = sources.map((s) => s.time).sort()
+      // 基础版不再是占位模板：把同源报道里的真实句子编排成一份可核对的静态报告。
+      // 当前发布域名没有模型通道，读者点「深挖」必须直接看到内容，而不是「深挖失败」。
+      const uniq = (arr) => [...new Set(arr.filter((x) => x && String(x).trim()))]
+      const lines = uniq(peers.map((a) => String(a.summary ?? '').replace(/\s+/g, ' ').trim()))
+      const sentences = uniq(
+        lines.join(' ').split(/(?<=[。！？；])/).map((s) => s.trim()).filter((s) => s.length > 8),
+      )
+      const pick = (re, fallback) => {
+        const hit = sentences.filter((s) => re.test(s)).slice(0, 3)
+        return hit.length ? hit : [fallback]
+      }
+      const facts = sentences.filter((s) => /\d/.test(s)).slice(0, 6)
+      const caliber = pick(
+        /口径|不等于|不是已|这是|注意|属于|不含|预测值|意向|尚未披露/,
+        `本条数字的可核对范围以「${brief.source}」披露为准，未披露的部分不做推测。`,
+      )
+      const impact = pick(/所以|意味着|影响|传导|会变|承压|改写|落到|改写/, `${brief.title}。${brief.summary}`)
+      const next = pick(
+        /下一步|观察点|观察|下一个|届时|到期|看招股书/,
+        '关注下一期同一事件的官方数据与后续披露。',
+      )
       reports.push({
         id: brief.id,
         level: 'outline',
@@ -78,37 +98,24 @@ export function buildReports({ dates }) {
         title: brief.title,
         tag: brief.tag,
         summary: brief.summary,
-        bottomLine: [
-          `目前共 ${sources.length} 篇同源报道（${times[0]} 起），完整事件报告尚未生成。`,
-          brief.summary,
-        ],
+        bottomLine: sentences.slice(0, 3).length >= 2 ? sentences.slice(0, 3) : [brief.summary],
         sections: [
-          {
-            heading: '目前已知的',
-            paragraphs: [
-              brief.summary,
-              `同期共有 ${sources.length} 篇报道，时间跨度 ${times[0]} 至 ${times[times.length - 1]}，均可通过下方链接核对原文。`,
-            ],
-          },
-          {
-            heading: '为什么这里是基础版',
-            paragraphs: [
-              '这条事件还没有生成完整报告。每天跑批时，只对进入深挖清单的事件调用报告提示词；未被选中的事件保留基础版，不做推测补充。',
-              '需要完整版时，把该事件加入当日深挖清单，模型按 event-report 提示词产出后重新跑管线即可。',
-            ],
-          },
+          { heading: '发生了什么', paragraphs: lines.slice(0, 3).length ? lines.slice(0, 3) : [brief.summary] },
+          { heading: '数字的口径与边界', paragraphs: caliber },
+          { heading: '为什么是现在、影响到谁', paragraphs: impact },
+          { heading: '接下来盯什么', paragraphs: next },
         ],
-        facts: [brief.summary],
-        stances: [],
-        openQuestions: ['该事件的后续进展与官方口径', '是否有更多独立信源交叉确认'],
+        facts: facts.length ? facts : [brief.summary],
+        stances: peers.length > 1 ? peers.map((a) => ({ source: a.source, point: String(a.title) })) : [],
+        openQuestions: uniq([...next.slice(0, 2), '是否有更多独立信源交叉确认']),
         sources,
         generatedWith: {
           level: 'outline',
           promptId: PROMPT_ID,
           promptVersion: PROMPT_VERSION,
-          model: '自动组装（未调用模型）',
+          model: '同源报道自动编排（未调用模型）',
           generatedAt: issue.generatedAt,
-          note: '基础版，由同期报道自动组装，不做推测补充。',
+          note: '由当期同源报道的原文句子编排，事实与口径均来自报道，未做推测补充。',
         },
       })
     }

@@ -246,7 +246,9 @@ export function getTopic(id: string): Topic | undefined {
 /** 构建期预生成的报告，作为首次打开时的现成内容；随时可以调模型重新深挖 */
 export function presetReport(id: string): GeneratedReport | undefined {
   const preset = getReport(id)
-  if (!preset || preset.level !== 'deep') return undefined
+  // 基础版（同源报道自动编排）也要直接展示：当前发布域名没有模型通道，
+  // 若在这里丢弃，页面会自动调模型并报「深挖失败」。
+  if (!preset) return undefined
   return {
     body: {
       bottomLine: preset.bottomLine,
