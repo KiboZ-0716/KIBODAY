@@ -8,7 +8,6 @@ import { IssueHeader } from '@/components/IssueHeader'
 import { TopStoriesSection } from '@/components/TopStoriesSection'
 import { BriefsSection } from '@/components/BriefsSection'
 import { TimelineSection } from '@/components/TimelineSection'
-import { Rail } from '@/components/Rail'
 import { RegionalSection } from '@/components/RegionalSection'
 import { ArchiveSection } from '@/components/ArchiveSection'
 
@@ -32,7 +31,6 @@ export function TodayPage() {
           <BriefsSection issue={issue} />
           <TimelineSection issue={issue} />
         </div>
-        <Rail issue={issue} onOpenMethod={() => openMethod(issue)} />
       </div>
 
       <RegionalSection issue={issue} />

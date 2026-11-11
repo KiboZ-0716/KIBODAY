@@ -45,13 +45,17 @@ export function compose({ source, brief, assets, no }) {
     url: event.articles[0].url,
   }))
 
-  // 「本期速览」与「属地新闻」不重复：属地版已经展开过的条目，速览里不再出现
+  // 「本期速览」同时与「今日重点」「属地新闻」去重，任何一条消息只出现一次。
+  // 今日重点用编辑化标题、速览用原始事实标题，措辞差异极大（实测 bigram 最低仅 0.16），
+  // 只比相似度抓不全，因此用「稀有数字锚点 + 核心专名子串 + 标题相似度」三重判定：
+  // 同一事件无论怎么改写，关键数字（144.7 / 4700 / 84.7）与核心专名（新能源乘用车出口 / 分拆平头哥）稳定不变。
+  const topAnchors = buildTopAnchors(brief)
   const regionalTitles = (brief.regional?.cities ?? []).flatMap((c) =>
     (c.items ?? []).map((i) => normalizeTitle(i.title)),
   ).filter(Boolean)
   const briefs = allBriefs.filter((b) => {
     const t = normalizeTitle(b.title)
-    return !regionalTitles.some((r) => titleDuplicate(r, t))
+    return !coveredByTopStory(b.title, topAnchors) && !regionalTitles.some((r) => titleDuplicate(r, t))
   })
 
   // 今日重点配图：按「日期 + 标题」确定性从免版权图池里选 4 张互不相同的图。
@@ -217,6 +221,53 @@ function pickCoverKeys(assets, date, titles, count) {
 
 function normalizeTitle(text = '') {
   return String(text).replace(/[\s\p{P}\p{S}]/gu, '')
+}
+
+/**
+ * 「今日重点」的锚点：头条 + 三张卡各算一个锚点块。
+ * 归一化会去掉标点，所以「144.7%」与「144.7」都变成 1447，标题与卡片数字口径自动对齐。
+ * 锚点同时收标题与卡片正文/数字/口径注，这样「英伟达两日跌超9%」这类编辑化标题
+ * 也能靠卡里的 4700 亿美元与速览的「市值蒸发超4700亿美元」对上。
+ */
+function buildTopAnchors(brief) {
+  const blocks = [
+    [brief.lead?.title, brief.lead?.dek].filter(Boolean).join(' '),
+    ...(brief.cards ?? []).map((c) =>
+      [c.title, c.body, c.footnote, c.caption, c.big, c.unit, c.label].filter(Boolean).join(' '),
+    ),
+  ]
+  return blocks.map((text) => ({ grams: gramsOf(text), nums: rareNumsOf(text) }))
+}
+
+/** 相邻 2 字片段 + 连续数字串，作为「专名/数字」指纹 */
+function gramsOf(text) {
+  const t = normalizeTitle(text)
+  const set = new Set()
+  for (let i = 0; i < t.length - 1; i += 1) set.add(t.slice(i, i + 2))
+  for (const m of t.matchAll(/\d{2,}/g)) set.add(m[0])
+  return set
+}
+
+function rareNumsOf(text) {
+  return [...normalizeTitle(text).matchAll(/\d{3,}/g)].map((m) => m[0])
+}
+
+/** 速览某条是否与今日重点讲的是同一件事 */
+function coveredByTopStory(title, anchors) {
+  const g = gramsOf(title)
+  if (!g.size) return false
+  const nums = rareNumsOf(title)
+  for (const a of anchors) {
+    if (!a.grams.size) continue
+    let hit = 0
+    for (const x of g) if (a.grams.has(x)) hit += 1
+    const overlap = hit / Math.min(g.size, a.grams.size)
+    const sharedRare = nums.some((n) => a.nums.includes(n))
+    if (overlap > 0.72) return true                    // 措辞高度雷同，几乎确定同事件
+    if (sharedRare && overlap > 0.18) return true      // 共享关键数字（口径/量级一致）
+    if (overlap > 0.5) return true                     // 专名大面积重合
+  }
+  return false
 }
 
 /** 完全相同、互相包含，或二字词组重合度 > 0.72，都算同一条新闻 */

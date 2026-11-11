@@ -597,13 +597,14 @@ main,
 /* ---------- 内容栅格 ---------- */
 .content-grid {
   display: grid;
-  grid-template-columns: minmax(0, 2.05fr) minmax(300px, 0.95fr);
-  gap: 56px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
   padding: 64px 0 76px;
 }
 
 .main-column {
   min-width: 0;
+  max-width: 880px;
 }
 
 .section-block {

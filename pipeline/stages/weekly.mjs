@@ -35,17 +35,38 @@ function assertIssue(issue, file) {
     if (!issue.overview[key]) throw new Error(`周报 ${issue.id} 的 overview 缺少 ${key}`)
   }
   if (!issue.deepDives.length) throw new Error(`周报 ${issue.id} 没有深读条目`)
+  // v2 深度闸门：标了 schemaVersion>=2 的期次，深读必须给出完整深度结构，
+  // 且「分析」「趋势」「速览意义」都设有最低信息量，拦住「抄标题 / 口号 / 套话」。
+  // 历史期次（无 schemaVersion）保持兼容，页面自动降级到旧版式。
+  const deepV2 = Number(issue.schemaVersion ?? 1) >= 2
+  const V2_FIELDS = ['bottomLine', 'context', 'mechanism', 'keyNumbers', 'concept', 'stances', 'openQuestions', 'watch']
   for (const item of issue.deepDives) {
     for (const key of ['no', 'category', 'title', 'fact', 'analysis', 'pm', 'project', 'action']) {
       if (!item[key]) throw new Error(`周报 ${issue.id} 的深读 ${item.no ?? '?'} 缺少 ${key}`)
     }
     if (!item.sources?.length) throw new Error(`周报 ${issue.id} 的深读 ${item.no} 没有来源`)
+    if (deepV2) {
+      for (const key of V2_FIELDS) {
+        if (item[key] === undefined || item[key] === null || (Array.isArray(item[key]) && !item[key].length)) {
+          throw new Error(`周报 ${issue.id} 的深读 ${item.no} 缺少深度字段 ${key}（v2 规范）`)
+        }
+      }
+      if (item.bottomLine.length < 2) throw new Error(`周报 ${issue.id} 的深读 ${item.no} 结论少于 2 条`)
+      if (item.analysis.length < 60) throw new Error(`周报 ${issue.id} 的深读 ${item.no} 分析过短（疑似一句口号）`)
+      if (item.mechanism.length < 60) throw new Error(`周报 ${issue.id} 的深读 ${item.no} 机制说明过短`)
+    }
   }
   for (const item of issue.shipList) {
     if (!item.name || !item.meaning) throw new Error(`周报 ${issue.id} 的速览条目字段不完整`)
+    if (deepV2 && item.meaning.length < 24) {
+      throw new Error(`周报 ${issue.id} 的速览「${item.name}」意义过短（疑似复述标题）`)
+    }
   }
   for (const item of issue.trends) {
     if (!item.title || !item.body) throw new Error(`周报 ${issue.id} 的趋势判断字段不完整`)
+    if (deepV2 && item.body.length < 90) {
+      throw new Error(`周报 ${issue.id} 的趋势「${item.title}」缺少依据/反例/观察点`)
+    }
   }
   if (!issue.checklists.pm?.length || !issue.checklists.project?.length) {
     throw new Error(`周报 ${issue.id} 的行动清单不完整`)

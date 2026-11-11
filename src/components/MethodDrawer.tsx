@@ -54,10 +54,6 @@ export function MethodDrawer({ issue, onClose }: { issue: Issue | null; onClose:
               <span>未过闸隐藏</span>
               <b>{stats.hidden} 条</b>
             </li>
-            <li>
-              <span>综合可信度</span>
-              <b>{issue.quality.score} / 100</b>
-            </li>
           </ul>
 
           <h3>处理流程</h3>
@@ -87,23 +83,10 @@ export function MethodDrawer({ issue, onClose }: { issue: Issue | null; onClose:
             ))}
           </ul>
 
-          <h3>研判口径</h3>
-          <ul className="meter-list">
-            {issue.trends.map((trend) => (
-              <li key={trend.title}>
-                <span>{trend.title}</span>
-                <b>{trend.score} / 100</b>
-              </li>
-            ))}
-          </ul>
-          <p style={{ marginTop: 14 }}>
-            趋势评分由事件数量、独立信源权重与近 7 日变化合成，仅用于排序参考，不构成事实判断。
-          </p>
-
           <h3>边界说明</h3>
           <p>
             事实信息来自原始信源，分析性内容由模型生成。日报不对事件定性，只呈现已核验的信息与可追溯的推理路径；
-            原文链接与核验记录保留在每期信源矩阵中。
+            每条速览都附原文链接，可点开逐条核对。
           </p>
         </div>
       </aside>

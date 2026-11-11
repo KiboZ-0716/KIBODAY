@@ -303,6 +303,123 @@
   line-height: 1.9;
 }
 
+/* ---------- 深读 v2：深度结构区块 ---------- */
+.deep-block {
+  padding: 18px 0 0;
+  margin-top: 18px;
+  border-top: 1px solid var(--soft-line);
+}
+
+.deep-label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--red);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+}
+
+.deep-block p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.95;
+}
+
+.deep-bottomline {
+  border-top: 2px solid var(--ink);
+  margin-top: 22px;
+  padding-top: 18px;
+}
+
+.deep-bottomline ol {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.deep-bottomline li {
+  margin-bottom: 9px;
+  font-size: 13px;
+  line-height: 1.85;
+}
+
+.deep-bottomline li:last-child {
+  margin-bottom: 0;
+}
+
+.deep-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+.deep-columns > div > .deep-label {
+  min-height: 15px;
+}
+
+.deep-numbers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+
+.deep-number-item {
+  background: var(--paper, #fff);
+  padding: 14px 15px;
+}
+
+.deep-number-item b {
+  display: block;
+  color: var(--red);
+  font: 800 19px var(--font-serif);
+}
+
+.deep-number-item > span {
+  display: block;
+  margin: 4px 0 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.deep-number-item p {
+  font-size: 11px;
+  line-height: 1.75;
+}
+
+.deep-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.deep-list li {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.85;
+}
+
+.deep-list li:last-child {
+  margin-bottom: 0;
+}
+
+.deep-list b {
+  color: var(--ink);
+}
+
+.deep-watch {
+  border-left: 3px solid var(--acid, #d7f000);
+  padding-left: 16px;
+}
+
+@media (max-width: 760px) {
+  .deep-columns {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}
+
 .role-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

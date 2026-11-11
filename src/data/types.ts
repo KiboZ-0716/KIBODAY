@@ -273,6 +273,15 @@ export interface WeeklyDeepDive {
   project: string
   action: string
   sources: WeeklySource[]
+  /** v2 深度结构：以下为可选，历史期次没有时页面自动降级到旧的 fact/analysis 版式 */
+  bottomLine?: string[]                                  // 三句话结论，至少一条以「判断：」开头
+  context?: string                                     // 前因：为什么偏偏是现在
+  mechanism?: string                                   // 机制：从触发到结果怎么一步步传导
+  keyNumbers?: { value: string; label: string; note: string }[]  // 带口径的关键数字
+  concept?: string                                     // 概念与口径辨析
+  stances?: { source: string; point: string }[]        // 各方说法
+  openQuestions?: string[]                             // 待解问题
+  watch?: string                                       // 下一步盯什么
 }
 
 export interface WeeklyShip {

@@ -18,7 +18,7 @@ export function ArchivePage() {
         <p className="eyebrow">DAILY ARCHIVE · {issues.length} ISSUES</p>
         <h1>每一个早晨，都留下一份判断。</h1>
         <p className="lede">
-          按发布时间倒序排列。每期都保留当日的信源矩阵与质量报告，可以回看某个判断是在什么信息基础上做出的。
+          按发布时间倒序排列。每期都保留当日的事实条目与模型撰写的完整专题，可以回看某个判断是在什么信息基础上做出的。
         </p>
         <div className="head-meta">
           <span>共 {issues.length} 期</span>

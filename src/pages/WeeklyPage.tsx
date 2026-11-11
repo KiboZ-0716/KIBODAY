@@ -90,6 +90,88 @@ export function WeeklyPage() {
                         <p>{item.analysis}</p>
                       </div>
                     </div>
+
+                    {item.bottomLine?.length ? (
+                      <div className="deep-block deep-bottomline">
+                        <span className="deep-label">三句话结论</span>
+                        <ol>
+                          {item.bottomLine.map((line) => (
+                            <li key={line}>{line}</li>
+                          ))}
+                        </ol>
+                      </div>
+                    ) : null}
+
+                    {item.context || item.mechanism ? (
+                      <div className="deep-block deep-columns">
+                        {item.context ? (
+                          <div>
+                            <span className="deep-label">前因 · 为什么是现在</span>
+                            <p>{item.context}</p>
+                          </div>
+                        ) : null}
+                        {item.mechanism ? (
+                          <div>
+                            <span className="deep-label">机制 · 怎么一步步传导</span>
+                            <p>{item.mechanism}</p>
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
+
+                    {item.keyNumbers?.length ? (
+                      <div className="deep-block">
+                        <span className="deep-label">带口径的关键数字</span>
+                        <div className="deep-numbers">
+                          {item.keyNumbers.map((n) => (
+                            <div key={n.label} className="deep-number-item">
+                              <b>{n.value}</b>
+                              <span>{n.label}</span>
+                              <p>{n.note}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {item.concept ? (
+                      <div className="deep-block">
+                        <span className="deep-label">概念与口径</span>
+                        <p>{item.concept}</p>
+                      </div>
+                    ) : null}
+
+                    {item.stances?.length ? (
+                      <div className="deep-block">
+                        <span className="deep-label">各方说法</span>
+                        <ul className="deep-list">
+                          {item.stances.map((s) => (
+                            <li key={s.source}>
+                              <b>{s.source}</b>：{s.point}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+
+                    {item.openQuestions?.length ? (
+                      <div className="deep-block">
+                        <span className="deep-label">待解问题</span>
+                        <ul className="deep-list">
+                          {item.openQuestions.map((q) => (
+                            <li key={q}>{q}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+
+                    {item.watch ? (
+                      <div className="deep-block deep-watch">
+                        <span className="deep-label">接下来盯什么</span>
+                        <p>{item.watch}</p>
+                      </div>
+                    ) : null}
+
                     <div className="role-grid">
                       <div>
                         <span>对产品经理</span>
