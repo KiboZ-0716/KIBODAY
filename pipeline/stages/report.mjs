@@ -54,15 +54,30 @@ export function buildReports({ dates }) {
 
       // 深挖正文由出刊时的模型按 content/prompts/deep-story.md 撰写，
       // 优先读 content/deep/{briefId}.json；旧版 content/reports 作兼容。
+      // 准入校验：只有内容完整（结论 + 正文达到实质字数）的稿才允许标为「深读」，
+      // 空壳 / 被截断的文件一律降级走下面的「同源报道编排」如实兜底，
+      // 避免出现「页面空专题 + 虚标模型撰写」的质量事故。
       const deepPath = path.join(DEEP_DIR, `${brief.id}.json`)
       const legacyPath = path.join(REPORTS_DIR, `${brief.id}.json`)
-      const preset = fs.existsSync(deepPath)
+      const presetRaw = fs.existsSync(deepPath)
         ? readJson(deepPath)
         : fs.existsSync(legacyPath)
           ? readJson(legacyPath)
           : null
+      const sectionChars = (presetRaw?.sections ?? [])
+        .reduce((n, s) => n + (s?.paragraphs ?? []).join('').length, 0)
+      const narrativeChars = [presetRaw?.background, presetRaw?.mechanism, presetRaw?.impact, presetRaw?.whatNext]
+        .reduce((n, x) => n + String(x ?? '').length, 0)
+      const preset = presetRaw && (presetRaw.bottomLine?.length > 0) && (sectionChars >= 500 || narrativeChars >= 600)
+        ? presetRaw
+        : null
 
       if (preset) {
+        // 标注如实分档：模型稿写明模型；手写编辑稿写明编辑稿；不统一虚标。
+        const isModelAuthored = preset._meta?.authoredBy === 'model'
+        const credit = isModelAuthored
+          ? `${preset._meta.model} · 出刊时调用模型撰写`
+          : '编辑撰稿（按 deep-story 规范人工撰写并复核）'
         reports.push({
           id: brief.id,
           level: 'deep',
@@ -81,12 +96,11 @@ export function buildReports({ dates }) {
             level: 'deep',
             promptId: PROMPT_ID,
             promptVersion: PROMPT_VERSION,
-            // 深挖专题由 scripts/deepgen.mjs 在出刊时真调模型生成，展示真实模型名
-            model: preset._meta?.model
-              ? `${preset._meta.model} · 出刊时调用模型撰写`
-              : '出刊模型按 deep-story 规范撰写',
+            model: credit,
             generatedAt: preset._meta?.at ?? issue.generatedAt,
-            note: '由模型在出刊环节按 content/prompts/deep-story.md 写成完整专题分析，非脚本拼贴；事实与判断分开，数字带口径。',
+            note: isModelAuthored
+              ? '由模型在出刊环节按 content/prompts/deep-story.md 写成完整专题分析；事实与判断分开，数字带口径。'
+              : '由编辑按 content/prompts/deep-story.md 规范撰写并人工复核；事实与判断分开，数字带口径。',
           },
         })
         continue

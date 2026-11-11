@@ -102,6 +102,14 @@ export function compose({ source, brief, assets, no }) {
   const avgSources = events.reduce((sum, e) => sum + e.sourceCount, 0) / events.length
   const score = Math.round(clamp(58 + 24 * verifiedRatio + 3.2 * avgSources + (coverKeys ? 2 : 0), 60, 99))
 
+  // 数字一致性：研判摘要里「全篇 N 条原始素材…M 个可核对事件」必须是当期真实统计，
+  // 不能沿用写作时手工填的数（撤条/去重后数字会变，读起来与版面对不上）。
+  const synthesis = String(brief.synthesis ?? '')
+    .replace(
+      /全篇\s*\d+\s*条原始素材[，,]?\s*剔除通稿后留下\s*\d+\s*个可核对事件/,
+      `全篇 ${stats.fetched} 条原始素材，剔除通稿后留下 ${stats.events} 个可核对事件`,
+    )
+
   return {
     no,
     date: source.date,
@@ -110,7 +118,7 @@ export function compose({ source, brief, assets, no }) {
     generatedAt: brief.generatedAt ?? addMinutes(leadEvent.time, 38),
     headline: brief.headline,
     stats,
-    synthesis: brief.synthesis,
+    synthesis,
     lead: {
       kicker: brief.lead.kicker,
       title: brief.lead.title,

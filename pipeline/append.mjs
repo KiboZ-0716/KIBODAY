@@ -87,12 +87,27 @@ async function main() {
     // 事件报告：buildReports 会整体覆盖，调用后把历史报告合并回来
     const oldReports = readJson(path.join(ROOT, 'src', 'data', 'reports.json'), { reports: [] }).reports ?? []
     const todayReports = buildReports({ dates: [date] })
+    // 防降级：同 id 时保留更优版本——当天深读版覆盖旧稿，但当天若因模型失败
+    // 只产出 outline 兜底版，而历史留有完整深读稿，则保留旧深读稿，
+    // 避免「重出刊一次、质量掉一档」。
+    const deepQuality = (r) => {
+      const secs = (r?.sections ?? []).reduce((n, s) => n + (s?.paragraphs ?? []).join('').length, 0)
+      return (r?.level === 'deep' ? 1000 : 0) + secs
+    }
+    const kept = todayReports.map((r) => {
+      const old = oldReports.find((o) => o.id === r.id && o.date === date)
+      if (old && deepQuality(old) > deepQuality(r)) {
+        console.log(`  [报告] 保留历史更优稿：${r.id}（旧 deep ${deepQuality(old)} > 今 ${deepQuality(r)}）`)
+        return old
+      }
+      return r
+    })
     writeJson(path.join(ROOT, 'src', 'data', 'reports.json'), {
       promptId: 'deep-story',
       promptVersion: 'v1',
       promptPath: 'content/prompts/deep-story.md',
       generatedAt: new Date().toISOString(),
-      reports: [...todayReports, ...oldReports.filter((r) => r.date !== date)],
+      reports: [...kept, ...oldReports.filter((r) => r.date !== date && !kept.some((k) => k.id === r.id))],
     })
   }
 

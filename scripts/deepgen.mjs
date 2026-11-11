@@ -58,6 +58,25 @@ function safe(text, max = 300) {
   return String(text ?? '').replace(/[`{}]/g, '').replace(/\s+/g, ' ').trim().slice(0, max)
 }
 
+/**
+ * 判断一份已有深挖稿是否合格（两种 schema 都认）：
+ * - sections 版（deepgen 产物）：bottomLine 非空 且 sections 总字数 ≥ 500
+ * - background 版（手写编辑稿）：background/mechanism/impact 等核心字段合计 ≥ 600 字
+ * 不合格（空壳、被截断、字段全空）一律判「需重新生成」，避免空壳文件
+ * 永久残留导致页面出现空专题 + 虚假「模型撰写」标注。
+ */
+function isDeepUsable(old) {
+  if (!old || typeof old !== 'object') return false
+  const sectionChars = (old.sections ?? [])
+    .reduce((n, s) => n + (s?.paragraphs ?? []).join('').length, 0)
+  if (Array.isArray(old.sections)) {
+    return Boolean(old.sections.length >= 3) && sectionChars >= 500 && Boolean(old.bottomLine?.length)
+  }
+  const flatChars = [old.background, old.mechanism, old.impact, old.whatNext]
+    .reduce((n, x) => n + String(x ?? '').length, 0)
+  return flatChars >= 600 && Boolean(old.bottomLine?.length)
+}
+
 function buildUserPrompt(topic) {
   const lines = []
   lines.push(`事件标题：${safe(topic.title, 120)}`)
@@ -147,9 +166,7 @@ export async function generateDeepReports(opts = {}) {
     const f = path.join(DEEP_DIR, `${t.id}.json`)
     if (force || !fs.existsSync(f)) return true
     try {
-      const old = readJson(f)
-      // 旧稿若是纯脚本编排（无 sections 或无模型标记），重新用模型写
-      return !Array.isArray(old.sections) || old.sections.length < 3
+      return !isDeepUsable(readJson(f))
     } catch {
       return true
     }
@@ -172,12 +189,20 @@ export async function generateDeepReports(opts = {}) {
 
   let generated = 0
   let failed = 0
+  let discarded = 0
   let cursor = 0
   const workers = Array.from({ length: Math.min(concurrency, need.length) }, async () => {
     while (cursor < need.length) {
       const topic = need[cursor++]
       try {
-        const body = await generateOne(cloud, topic)
+        let body
+        try {
+          body = await generateOne(cloud, topic)
+        } catch (firstErr) {
+          // 单条失败重试一次，仍失败则进入统一失败处理
+          if (!quiet) console.warn(`  [深挖] ⚠ ${topic.id} 首次失败（${String(firstErr.message).slice(0, 60)}），重试一次`)
+          body = await generateOne(cloud, topic)
+        }
         writeJson(path.join(DEEP_DIR, `${topic.id}.json`), {
           ...body,
           _meta: { authoredBy: 'model', via: 'deepgen/sdk', model: MODEL, at: new Date().toISOString() },
@@ -187,13 +212,23 @@ export async function generateDeepReports(opts = {}) {
       } catch (e) {
         failed += 1
         if (!quiet) console.warn(`  [深挖] ✘ ${topic.id} · ${String(e.message).slice(0, 70)}`)
+        // 关键：若已有稿是不合格的空壳，删除它，让 report.mjs 走「同源报道编排」
+        // 的如实兜底，而不是留着空壳被虚标为「模型撰写的深读专题」。
+        const f = path.join(DEEP_DIR, `${topic.id}.json`)
+        try {
+          if (fs.existsSync(f) && !isDeepUsable(readJson(f))) {
+            fs.rmSync(f)
+            discarded += 1
+            if (!quiet) console.warn(`  [深挖] 🗑 ${topic.id} 清除不合格空壳稿，出刊将走如实编排兜底`)
+          }
+        } catch { /* 清理失败不影响出刊 */ }
       }
     }
   })
   await Promise.all(workers)
   const skipped = targets.length - need.length
-  if (!quiet) console.log(`  深挖模型撰稿：新生成 ${generated} · 已有跳过 ${skipped} · 失败 ${failed} / 共 ${targets.length}`)
-  return { generated, skipped, failed, total: targets.length }
+  if (!quiet) console.log(`  深挖模型撰稿：新生成 ${generated} · 已有跳过 ${skipped} · 失败 ${failed} · 清除空壳 ${discarded} / 共 ${targets.length}`)
+  return { generated, skipped, failed, discarded, total: targets.length }
 }
 
 // 允许单独运行：node scripts/deepgen.mjs [--date 2026-11-11] [--force]
