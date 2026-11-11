@@ -103,7 +103,10 @@ function relatedMaterial(ref, reports, issues) {
   const analysis = (analysisCandidates[0]?.score ?? 0) >= 0.06 ? analysisCandidates[0].issue.analysis : null
   const analysisIssue = analysisCandidates[0]?.issue ?? newest
 
-  return { newest, firstCard, firstLead, keyword, briefs, rpts, analysis, analysisIssue }
+  return {
+    newest, firstCard, firstLead, keyword, briefs, rpts, analysis, analysisIssue,
+    relatedDates: ref.issues.map((i) => i.date),
+  }
 }
 
 const NUMBER_RE = /(\d+(?:\.\d+)?\s*(?:%|个百分点|基点|bp|万亿|亿美元|万元|亿元|亿|万|美元|元|个|条|家|架|枚|辆|吨|人次|毫秒|小时|天|周|年|平方米|平米|吨\/年)?)/g
@@ -147,10 +150,23 @@ function pickNumbers(m) {
     return true
   }
   const out = [...priority.filter(keep), ...extra.filter(keep)].slice(0, 5)
-  if (!out.length && m.briefs.length) {
-    out.push({ value: String(m.briefs.length), label: '本期相关报道条数' })
+  // 少于 2 个时用可核对的真实统计补足，避免关键数字区只剩一个孤立数字
+  if (out.length < 2) {
+    const fills = [
+      { value: String(m.briefs.length), label: '本期相关报道条数' },
+      { value: String(m.rpts.length), label: '可用事件报告份数' },
+      { value: String(refIssuesCount(m)), label: '跨期跟踪期数' },
+    ]
+    for (const f of fills) {
+      if (out.length >= 3) break
+      if (f.value !== '0' && !out.some((x) => x.value === f.value)) out.push(f)
+    }
   }
   return out
+}
+
+function refIssuesCount(m) {
+  return m.relatedDates?.length ?? 1
 }
 
 const TEMPLATE_HEADING = /目前已知的|为什么这里是基础版|这条事件还没有|需要完整版|同期共有|时间跨度/
