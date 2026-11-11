@@ -17,7 +17,7 @@ render()
 
 // 再去云端取最新一期（内部 2.5 秒超时，这里再加一层硬兜底）。
 // 拿到更新的内容就整体替换数据集并重新渲染 —— 每日出刊不需要重新部署站点。
-const HARD_TIMEOUT = 4000
+const HARD_TIMEOUT = 10000
 const guarded = Promise.race([
   loadRemoteContent(),
   new Promise<null>((resolve) => setTimeout(() => resolve(null), HARD_TIMEOUT)),

@@ -13,7 +13,7 @@ const TABLE = 'kib0_content'
 const ROW_ID = 'bundle'
 const LIVE_URL = 'https://raw.githubusercontent.com/KiboZ-0716/KIBODAY/main/live-bundle.json'
 /** 拉不到就直接用本地数据，不能让网络把首屏拖住 */
-const TIMEOUT_MS = 4000
+const TIMEOUT_MS = 9000
 
 export type LiveStatus = {
   source: 'cloud' | 'local'

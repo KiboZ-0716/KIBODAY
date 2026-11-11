@@ -50,7 +50,7 @@ async function main() {
       ? new Date().toISOString().slice(0, 10)
       : listSnapshotDates().pop())
 
-  console.log(`\n▶ K!B0 增量出品 · ${date} · 在库 ${all.length} 期`)
+  console.log(`\n▶ K!B0 增量出品 · ${args.weeklyOnly ? '仅周报' : date} · 在库 ${all.length} 期`)
 
   if (!args.weeklyOnly) {
     if (!date) throw new Error('找不到当日抓取快照，先写 content/raw/{日期}.json')
