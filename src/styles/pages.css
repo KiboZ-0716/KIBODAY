@@ -20,7 +20,7 @@
 .page-head .lede {
   margin-top: 16px;
   max-width: 620px;
-  font: 400 13px/1.95 var(--font-serif);
+  font: 400 15px/1.95 var(--font-serif);
   color: var(--muted);
 }
 
@@ -29,7 +29,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px 26px;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
 }
 
@@ -49,7 +49,7 @@
 .chip {
   border: 1px solid var(--line);
   padding: 7px 13px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   transition: 0.16s;
 }
@@ -94,14 +94,14 @@
 }
 
 .month-title span {
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 1.6px;
   color: var(--muted);
 }
 
 .month-title b {
   margin-left: auto;
-  font: 700 12px var(--font-serif);
+  font: 700 14px var(--font-serif);
   color: var(--muted);
 }
 
@@ -143,7 +143,7 @@
 
 .storyline-hero .hero-summary {
   color: #b8b8b2;
-  font: 400 13px/1.95 var(--font-serif);
+  font: 400 15px/1.95 var(--font-serif);
 }
 
 .hero-stats {
@@ -161,7 +161,7 @@
 }
 
 .hero-stats div span {
-  font-size: 10px;
+  font-size: 12px;
   color: #9a9a93;
   letter-spacing: 0.8px;
 }
@@ -203,18 +203,18 @@
 }
 
 .track-item time {
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 1.2px;
   color: var(--muted);
 }
 
 .track-item h3 {
-  font: 700 19px/1.5 var(--font-serif);
+  font: 700 20px/1.5 var(--font-serif);
   margin: 8px 0 8px;
 }
 
 .track-item p {
-  font: 400 13px/1.9 var(--font-serif);
+  font: 400 15px/1.9 var(--font-serif);
   color: var(--muted);
   max-width: 720px;
 }
@@ -222,7 +222,7 @@
 .track-item .track-flag {
   display: inline-block;
   margin-left: 10px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 1px;
   color: var(--red);
@@ -268,7 +268,7 @@
 
 .search-field svg {
   color: var(--muted);
-  font-size: 17px;
+  font-size: 18px;
   flex: 0 0 auto;
 }
 
@@ -276,7 +276,7 @@
   flex: 1;
   border: 0;
   background: transparent;
-  font: 400 16px var(--font-serif);
+  font: 400 17px var(--font-serif);
   min-width: 0;
 }
 
@@ -287,14 +287,14 @@
 .search-field kbd {
   border: 1px solid var(--line);
   padding: 2px 6px;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   font-family: var(--font-sans);
 }
 
 .search-hint {
   padding: 12px 20px;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   border-bottom: 1px solid var(--soft-line);
 }
@@ -318,13 +318,13 @@
 }
 
 .search-result small {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   letter-spacing: 0.4px;
 }
 
 .search-result h4 {
-  font: 700 14px/1.55 var(--font-serif);
+  font: 700 15px/1.55 var(--font-serif);
   margin-top: 4px;
 }
 
@@ -338,7 +338,7 @@
   padding: 34px 20px;
   text-align: center;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 /* ---------- 抽屉 ---------- */
@@ -377,7 +377,7 @@
 }
 
 .drawer-head h2 {
-  font: 800 18px var(--font-serif);
+  font: 800 19px var(--font-serif);
 }
 
 .drawer-body {
@@ -385,7 +385,7 @@
 }
 
 .drawer-body h3 {
-  font: 800 14px var(--font-serif);
+  font: 800 15px var(--font-serif);
   margin: 26px 0 12px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--line);
@@ -396,7 +396,7 @@
 }
 
 .drawer-body p {
-  font: 400 12px/1.95 var(--font-serif);
+  font: 400 14px/1.95 var(--font-serif);
   color: var(--muted);
 }
 
@@ -415,13 +415,13 @@
 }
 
 .flow-step b {
-  font: 800 13px var(--font-serif);
+  font: 800 15px var(--font-serif);
   color: var(--red);
 }
 
 .flow-step span {
   display: block;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   line-height: 1.8;
   margin-top: 3px;
@@ -433,7 +433,7 @@
   gap: 12px;
   padding: 9px 0;
   border-bottom: 1px solid var(--soft-line);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .meter-list li span {
@@ -448,12 +448,12 @@
 }
 
 .empty-state h3 {
-  font: 800 18px var(--font-serif);
+  font: 800 19px var(--font-serif);
   margin-bottom: 10px;
 }
 
 .empty-state p {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   line-height: 1.9;
   margin-bottom: 20px;
@@ -465,7 +465,7 @@
   gap: 8px;
   border: 1px solid var(--ink);
   padding: 10px 16px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -477,7 +477,7 @@
   border-top: 1px solid var(--ink);
   margin-top: 20px;
   padding-top: 18px;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .issue-switch a {
@@ -493,7 +493,7 @@
 }
 
 .issue-switch a b {
-  font: 700 13px/1.5 var(--font-serif);
+  font: 700 15px/1.5 var(--font-serif);
   color: var(--ink);
 }
 
@@ -574,11 +574,11 @@
 }
 
 .follow-suggest .rail-title span {
-  font: 800 18px var(--serif);
+  font: 800 19px var(--serif);
 }
 
 .follow-suggest .rail-title b {
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 1.9px;
   color: var(--muted);
 }
@@ -598,11 +598,11 @@
 }
 
 .follow-suggest .rail-title span {
-  font: 800 18px var(--serif);
+  font: 800 19px var(--serif);
 }
 
 .follow-suggest .rail-title b {
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 1.9px;
   color: var(--muted);
 }
@@ -616,12 +616,12 @@
   border-top: 1px solid var(--ink);
   border-bottom: 1px solid var(--line);
   padding: 12px 0;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
 }
 
 .filter-note button {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   border-bottom: 1px solid var(--ink);
   padding-bottom: 2px;
@@ -642,12 +642,12 @@
   border-top: 1px solid var(--ink);
   border-bottom: 1px solid var(--line);
   padding: 12px 0;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
 }
 
 .filter-note button {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   border-bottom: 1px solid var(--ink);
   padding-bottom: 2px;
@@ -692,7 +692,7 @@
   position: absolute;
   left: 0;
   top: 2px;
-  font: 800 15px var(--serif);
+  font: 800 16px var(--serif);
   color: var(--red);
 }
 
@@ -703,7 +703,7 @@
 }
 
 .deep-section p {
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.95;
   color: #2a2a26;
   margin-bottom: 13px;
@@ -717,7 +717,7 @@
 .deep-section ul li {
   position: relative;
   padding-left: 16px;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.9;
   color: #2a2a26;
 }
@@ -744,7 +744,7 @@
 
 .deep-card > span {
   display: block;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 1.9px;
   color: var(--muted);
   margin-bottom: 14px;
@@ -772,7 +772,7 @@
 }
 
 .deep-card .impact-grid span {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   text-align: right;
 }
@@ -784,12 +784,12 @@
 }
 
 .takeaway-card h3 {
-  font: 700 17px var(--serif);
+  font: 700 18px var(--serif);
   margin: 0 0 10px;
 }
 
 .takeaway-card p {
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.85;
   margin-bottom: 14px;
 }
@@ -801,7 +801,7 @@
 .takeaway-card ul li {
   display: flex;
   gap: 8px;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.7;
   padding: 7px 0;
   border-top: 1px solid rgba(17, 17, 15, 0.12);
@@ -824,16 +824,16 @@
 }
 
 .citation-list b {
-  font: 700 15px var(--serif);
+  font: 700 16px var(--serif);
   grid-row: span 2;
 }
 
 .citation-list span {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .citation-list small {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
 }
 
@@ -856,7 +856,7 @@
 
 .related-list b {
   display: block;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   line-height: 1.6;
 }
@@ -867,7 +867,7 @@
 
 .related-list small {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   margin-top: 4px;
 }
@@ -906,29 +906,29 @@
 }
 
 .report-gen b {
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 1.4px;
 }
 
 .report-gen span {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
 }
 
 .report-gen small {
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.7;
   color: #44443e;
 }
 
 .bottom-line .deep-section-index {
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 1.2px;
   top: 4px;
 }
 
 .report-footnote {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   line-height: 1.8;
   border-top: 1px solid var(--line);
@@ -949,7 +949,7 @@
   border: 1px solid var(--ink);
   background: var(--ink);
   color: var(--white);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   padding: 7px 14px;
   white-space: nowrap;
@@ -1002,7 +1002,7 @@
 }
 
 .generating-state > p {
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.85;
   color: #44443e;
   margin-bottom: 14px;
@@ -1017,7 +1017,7 @@
 .generating-state li {
   position: relative;
   padding-left: 18px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
 }
 
@@ -1074,7 +1074,7 @@
   border: 1px solid var(--ink);
   background: var(--ink);
   color: var(--white);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   padding: 7px 14px;
   white-space: nowrap;
@@ -1127,7 +1127,7 @@
 }
 
 .generating-state > p {
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.85;
   color: #44443e;
   margin-bottom: 14px;
@@ -1142,7 +1142,7 @@
 .generating-state li {
   position: relative;
   padding-left: 18px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
 }
 
