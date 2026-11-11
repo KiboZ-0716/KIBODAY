@@ -167,16 +167,27 @@ function withRegionalIds(regional, date) {
   }
 }
 
-/** 重要度：编辑标注优先（1—5），否则按可核对信号打分，保证「重要的排前面」 */
+/**
+ * 重要度：编辑标注优先（1—5），否则按可核对信号打分，保证「重要的排前面」。
+ * 财经与非财经信号词**分开各计一次**，避免财经词表数量多导致非财经硬新闻
+ * 系统性低分（对应 feeds.json topicMix 的 60—70% 配比：配比靠多检索达成，
+ * 不靠改排序，所以这里只做「打分口径校准」，不做题材配额、不给非财经加权）。
+ */
+const FINANCE_SIGNAL = /利率|加息|CPI|央行|关税|监管|汇率|出口|财报|分拆|上市|GDP|就业|通胀|产能|订单|营收|估值|融资|并购|股价|市值|进出口|成交额/
+const PUBLIC_SIGNAL = /制裁|选举|判决|司法解释|事故|遇难|伤亡|灾害|疫情|确诊|疫苗|医保|集采|召回|停课|停运|管制|疏散|赔付|火灾|地震|暴雨|寒潮|污染|预警|抽检|起诉|通报|问责|学费|放假|退休|社保|学位|药品|审批|停供|限行/
+const FINANCE_UNIT = /亿|万亿|%|个百分点|美元|元\/|基点|bp|万辆|吨/
+const PUBLIC_UNIT = /人|例|户|起|所学校|毫米|摄氏度|℃|公里|万人次|万千瓦|万件|天数|省份|个省|级响应/
+
 function importanceOf(event, brief) {
   const explicit = brief.importance?.[event.articles[0].id] ?? event.articles[0].importance
   if (Number.isFinite(Number(explicit)) && Number(explicit) > 0) return Number(explicit)
   const text = `${event.title} ${event.summary}`
   let score = 1
   score += Math.min(event.sourceCount, 3) * 0.6            // 多信源交叉
-  if (/利率|加息|CPI|央行|关税|监管|汇率|出口|财报|分拆|上市|GDP|就业|通胀|制裁|选举|判决|事故|遇难|灾害/.test(text)) score += 1.6
-  if (/亿|万亿|%|个百分点|美元|元\/|基点|bp|万辆|吨/.test(event.summary)) score += 0.7
-  if (/\d/.test(event.summary) && /所以|意味着|判断|下一步|观察点|传导|回落|改写/.test(event.summary)) score += 0.5
+  if (FINANCE_SIGNAL.test(text)) score += 1.6
+  if (PUBLIC_SIGNAL.test(text)) score += 1.6               // 与财经同等权重，校准而非加权
+  if (FINANCE_UNIT.test(event.summary) || PUBLIC_UNIT.test(event.summary)) score += 0.7
+  if (/\d/.test(event.summary) && /所以|意味着|判断|下一步|观察点|传导|回落|改写|责任|救治|后续/.test(event.summary)) score += 0.5
   if (/会议召开|圆满|揭晓|慰问|调研|建成\d+座/.test(event.title)) score -= 1.5
   return Math.round(clamp(score, 1, 5) * 10) / 10
 }
