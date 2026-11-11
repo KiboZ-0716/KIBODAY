@@ -1,11 +1,87 @@
 {
-  "note": "线上抓取数据源。授权/版权以各站 RSS 条款为准；抓取器只取标题、时间、摘要与原文配图链接，不全文转载。",
+  "version": 2,
+  "note": "信源白名单（编辑台标准，不是抓取器配置）。分层见 content/prompts/source-guide.md 第一条：主体事实必须来自 A/B 层，C 层只用于核实事实存在，D 层禁止作为 source。抓取器只取标题、时间、摘要与原文链接，不全文转载；授权/版权以各站条款为准。",
+  "rule": "上刊前逐条问：这条事实能追到 A 层文件或 2 个独立 B 层媒体吗？有没有带口径的数字？是不是黑名单里的通稿？答不出就不收。",
+  "tiers": [
+    {
+      "tier": "A",
+      "name": "一手披露 · 数字与口径的唯一依据",
+      "usage": "财报、公告、批文、原始数据、官方声明。写清「谁在哪份文件里说了什么」。",
+      "sources": [
+        { "name": "巨潮资讯网（沪深上市公司公告）", "url": "http://www.cninfo.com.cn/" },
+        { "name": "上海证券交易所 / 深圳证券交易所 披露", "url": "http://www.sse.com.cn/" },
+        { "name": "港交所披露易 HKEXnews", "url": "https://www.hkexnews.hk/" },
+        { "name": "美国 SEC EDGAR", "url": "https://www.sec.gov/edgar" },
+        { "name": "中国人民银行", "url": "http://www.pbc.gov.cn/" },
+        { "name": "国家统计局", "url": "https://www.stats.gov.cn/" },
+        { "name": "海关总署", "url": "http://www.customs.gov.cn/" },
+        { "name": "财政部", "url": "http://www.mof.gov.cn/" },
+        { "name": "国家发展改革委（价格、政策原文）", "url": "https://www.ndrc.gov.cn/" },
+        { "name": "商务部 / 国家能源局 / 工信部 正式文件", "url": "https://www.mofcom.gov.cn/" },
+        { "name": "中国证监会 / 国家金融监督管理总局 处罚与批文", "url": "http://www.csrc.gov.cn/" },
+        { "name": "国务院关税税则委员会公告", "url": "http://gss.mof.gov.cn/" },
+        { "name": "美联储 FOMC / 美国劳工统计局 BLS / EIA", "url": "https://www.bls.gov/" },
+        { "name": "欧盟统计局 Eurostat / 欧央行 ECB", "url": "https://ec.europa.eu/eurostat" },
+        { "name": "IEA / IMF / OPEC / WHO / WTO 报告", "url": "https://www.iea.org/" },
+        { "name": "企业官方博客与发布会（OpenAI / Google / 英伟达 / 苹果 / 华为等）", "url": "" },
+        { "name": "乘联分会 / 中汽协 / 中国信通院 行业数据", "url": "http://www.cpcaauto.com/" }
+      ]
+    },
+    {
+      "tier": "B",
+      "name": "商业与财经媒体 · 背景、产业链、多角度与解读",
+      "usage": "每条至少配 1 个 A 层锚点；不同媒体口径冲突时并列写出，不擅自取平均。",
+      "sources": [
+        { "name": "财新", "url": "https://www.caixin.com/" },
+        { "name": "第一财经", "url": "https://www.yicai.com/" },
+        { "name": "21世纪经济报道", "url": "https://www.21jingji.com/" },
+        { "name": "经济观察报", "url": "https://www.eeo.com.cn/" },
+        { "name": "界面新闻", "url": "https://www.jiemian.com/" },
+        { "name": "晚点 LatePost", "url": "https://www.latepost.com/" },
+        { "name": "36氪 / 8点1氪", "url": "https://36kr.com/" },
+        { "name": "虎嗅 / 虎嗅早报", "url": "https://www.huxiu.com/" },
+        { "name": "钛媒体", "url": "https://www.tmtpost.com/" },
+        { "name": "财联社 / 电报", "url": "https://www.cls.cn/" },
+        { "name": "证券时报 / 券商中国", "url": "https://www.stcn.com/" },
+        { "name": "中国基金报 / 上海证券报", "url": "https://www.cnstock.com/" },
+        { "name": "路透社 Reuters", "url": "https://www.reuters.com/" },
+        { "name": "彭博 Bloomberg", "url": "https://www.bloomberg.com/" },
+        { "name": "金融时报 FT / 华尔街日报 WSJ / 日经", "url": "https://www.ft.com/" },
+        { "name": "The Information / TechCrunch", "url": "https://www.theinformation.com/" },
+        { "name": "声动早咖啡 / 声动活泼（商业科技轻解读）", "url": "https://www.shengfm.cn/" }
+      ]
+    },
+    {
+      "tier": "C",
+      "name": "通讯社与官方发布 · 只用于核实事实与补时间戳",
+      "usage": "不得照抄通稿标题与导语，不得作为分析来源。黑名单类型（会议、表彰、工程进度、慰问调研、纪念仪式）一律不收。",
+      "sources": [
+        { "name": "新华社", "url": "https://www.news.cn/" },
+        { "name": "央视新闻", "url": "https://news.cctv.com/" },
+        { "name": "中国新闻网", "url": "https://www.chinanews.com.cn/" },
+        { "name": "人民日报 / 经济日报", "url": "http://www.people.com.cn/" },
+        { "name": "地方政府与部委网站（仅核对日期）", "url": "" }
+      ]
+    },
+    {
+      "tier": "D",
+      "name": "禁止作为事实来源",
+      "usage": "仅作线索。禁止写入 source 字段，禁止作为数字出处。",
+      "blocked": ["门户聚合号", "无署名转载", "营销号", "「综合」「网络」「据悉」类无具名出处", "自媒体转述的未核实数据"],
+      "sources": []
+    }
+  ],
+  "blacklist": [
+    "会议开幕 / 圆满闭幕 / 顺利举行 / 论坛启幕",
+    "表彰通报 / 奖项揭晓 / 获评先进",
+    "工程建成 N 座 / 项目进度达 N%（无参照系、无后果）",
+    "慰问调研 / 签署战略合作协议（无金额无条款）",
+    "纪念仪式 / 遗骸移交 / 认亲仪式",
+    "无后果的天气预报 / 会议预告 / 无金额的人事任免"
+  ],
   "feeds": [
-    { "name": "新华社", "url": "https://www.news.cn/politics/news_politics.xml" },
-    { "name": "央视新闻", "url": "https://news.cctv.com/rss/china.xml" },
-    { "name": "国家发展改革委", "url": "https://www.ndrc.gov.cn/xwdt/xwfb/rss.xml" },
-    { "name": "应急管理部", "url": "https://www.mem.gov.cn/xw/yjgl/rss.xml" },
-    { "name": "交通运输部", "url": "https://www.mot.gov.cn/rss/news.xml" },
-    { "name": "国家统计局", "url": "https://www.stats.gov.cn/sj/zxfb/rss.xml" }
-  ]
+    { "name": "国家统计局", "url": "https://www.stats.gov.cn/sj/zxfb/rss.xml" },
+    { "name": "国家发展改革委", "url": "https://www.ndrc.gov.cn/xwdt/xwfb/rss.xml" }
+  ],
+  "feedsCompatNote": "顶层 feeds 仅供 pipeline/sources/rss.mjs 接口兼容（在线抓取器当前未启用，管线走 snapshot 离线快照）。它只保留 2 个 A 层原始数据发布源，旧的政务新闻 RSS 已移除。选题与署名的权威依据是上面的 tiers，不是这个数组。"
 }

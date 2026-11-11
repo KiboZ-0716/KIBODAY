@@ -35,7 +35,9 @@ export function compose({ source, brief, assets, no }) {
     title: event.title,
     source: event.sources[0],
     sources: event.sourceCount,
-    summary: trim(event.summary, 64),
+    // 摘要是读者真正读到的正文（首页速览直接渲染），不再砍到 64 字。
+    // 规范见 content/prompts/source-guide.md 第五条：含增量事实 / 为什么是现在 / 所以呢 / 下一步。
+    summary: trim(event.summary, 200),
     url: event.articles[0].url,
   })).sort((a, b) => String(b.time).localeCompare(String(a.time)))
 

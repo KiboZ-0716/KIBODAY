@@ -1,7 +1,7 @@
 {
   "city": {
-    "sourceMtime": 1793328284774.5576,
-    "source": "content\\images\\city.jpg",
+    "sourceMtime": 1793328284000,
+    "source": "content/images/city.jpg",
     "sizes": {
       "lg": {
         "width": 1400,
@@ -23,8 +23,8 @@
     "height": 932
   },
   "climate": {
-    "sourceMtime": 1793328284640.3464,
-    "source": "content\\images\\climate.jpg",
+    "sourceMtime": 1793328284000,
+    "source": "content/images/climate.jpg",
     "sizes": {
       "lg": {
         "width": 1400,
@@ -46,8 +46,8 @@
     "height": 788
   },
   "energy": {
-    "sourceMtime": 1793328284698.4202,
-    "source": "content\\images\\energy.jpg",
+    "sourceMtime": 1793328284000,
+    "source": "content/images/energy.jpg",
     "sizes": {
       "lg": {
         "width": 1400,
@@ -69,8 +69,8 @@
     "height": 932
   },
   "port": {
-    "sourceMtime": 1793328284850.629,
-    "source": "content\\images\\port.jpg",
+    "sourceMtime": 1793328284000,
+    "source": "content/images/port.jpg",
     "sizes": {
       "lg": {
         "width": 1400,
@@ -92,8 +92,8 @@
     "height": 932
   },
   "transit": {
-    "sourceMtime": 1793328284614.567,
-    "source": "content\\images\\transit.jpg",
+    "sourceMtime": 1793328284000,
+    "source": "content/images/transit.jpg",
     "sizes": {
       "lg": {
         "width": 1400,

@@ -688,6 +688,39 @@ main,
   font-size: 11px;
 }
 
+/* 首页速览：摘要是正文，不是占位符 */
+.news-row--rich {
+  align-items: start;
+  padding: 24px 0;
+}
+
+.news-row--rich h3 {
+  display: block;
+  font-size: 17px;
+  line-height: 1.55;
+  margin-bottom: 8px;
+}
+
+.news-row--rich .news-summary {
+  margin: 0;
+  color: var(--ink);
+  opacity: 0.82;
+  font-size: 13px;
+  line-height: 1.85;
+  max-width: 74ch;
+}
+
+.news-row--rich .news-byline {
+  margin: 9px 0 0;
+  color: var(--muted);
+  font-size: 10.5px;
+  letter-spacing: 0.3px;
+}
+
+.news-row--rich .row-actions {
+  padding-top: 2px;
+}
+
 .row-arrow {
   border: 1px solid var(--line);
   width: 31px;

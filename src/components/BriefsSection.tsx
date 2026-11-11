@@ -22,7 +22,7 @@ function duplicate(a: string, b: string) {
   return hit / Math.min(A.size, B.size) > 0.72
 }
 
-export function BriefsSection({ issue, limit = 4 }: { issue: Issue; limit?: number }) {
+export function BriefsSection({ issue, limit = 6 }: { issue: Issue; limit?: number }) {
   // 「与你有关」已经展开的条目不再出现在「本期速览」，两个版块不重复
   const regionalTitles = (issue.regional?.cities ?? []).flatMap((c) =>
     (c.items ?? []).map((i) => normalize(i.title)),
@@ -47,13 +47,14 @@ export function BriefsSection({ issue, limit = 4 }: { issue: Issue; limit?: numb
 
       <div className="news-list">
         {shown.map((brief) => (
-          <div className="news-row" key={`${brief.time}-${brief.title}`}>
+          <div className="news-row news-row--rich" key={`${brief.time}-${brief.title}`}>
             <time>{brief.time}</time>
             <div>
               <span className="topic-tag">{brief.tag}</span>
               <h3>{brief.title}</h3>
-              <p>
-                {brief.source} · {brief.sources} 个信源 · AI 摘要
+              <p className="news-summary">{brief.summary}</p>
+              <p className="news-byline">
+                {brief.source} · {brief.sources} 个信源 · 原文可核对
               </p>
             </div>
             <span className="row-actions">
