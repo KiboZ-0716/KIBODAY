@@ -5,8 +5,8 @@ import { PageShell } from '@/components/PageShell'
 import { Icon } from '@/components/Icon'
 
 /**
- * 「追踪」= 订阅一个还没结论的事件。
- * 同一个事件每天出现新报道时，内容包会给它加一个节点，这里就会跟着变。
+ * 「追踪」= 订阅一个还没结论的事件：每天汇总它的新进展。
+ * 不追踪的事件只作为候选列在下面，不进入清单、不逐日跟踪。
  * 订阅关系存在浏览器本地，不需要登录。
  */
 export function FollowingPage() {
@@ -16,12 +16,19 @@ export function FollowingPage() {
   const tracked = storylines.filter((s) => ids.includes(s.id)).sort(byNewest)
   const available = storylines.filter((s) => !ids.includes(s.id)).sort(byNewest)
   const today = latestIssue?.date ?? ''
-  const fresh = storylines.filter((s) => s.updatedAt === today).length
+
+  const hasFreshProgress = (s: typeof storylines[number]) =>
+    (s.nodes ?? []).some(
+      (n) => String(n.time).includes('今日进展') && !/没有新的可核对进展/.test(n.title),
+    ) && s.updatedAt === today
+  const fresh = tracked.filter(hasFreshProgress).length
 
   const row = (storyline: typeof storylines[number], isTracked: boolean) => {
     const issue = getIssue(storyline.latestNo)
-    const node = issue ? storyline.nodes[Math.min(issue.currentNode, storyline.nodes.length - 1)] : storyline.nodes[storyline.nodes.length - 1]
-    const isFresh = !!storyline.updatedAt && storyline.updatedAt >= today
+    const node = issue
+      ? storyline.nodes[Math.min(issue.currentNode, storyline.nodes.length - 1)]
+      : storyline.nodes[storyline.nodes.length - 1]
+    const isFresh = hasFreshProgress(storyline)
     return (
       <div className="archive-row" key={storyline.id} style={{ gridTemplateColumns: '110px minmax(0, 1fr) 170px auto' }}>
         <span className="archive-date">
@@ -58,8 +65,8 @@ export function FollowingPage() {
         <p className="eyebrow">WATCHLIST · {tracked.length} TRACKED · {fresh} UPDATED TODAY</p>
         <h1>你在等结论的事。</h1>
         <p className="lede">
-          一个事件往往要几天才有结果。点「追踪事件」把它留在这里，之后每期日报只要出现新进展，
-          它的时间线就会多一个节点，并标上「今日有新进展」。订阅只存在这台设备的浏览器里，不需要登录。
+          <b>追踪 = 每天替你盯这条事件</b>：每期日报只要出现新报道，这里就多一个节点并标「今日有新进展」，首页的持续追踪也会展开完整时间线。
+          <b> 不追踪 = 不特别跟踪</b>，只作为候选列在下面，不占你的追踪清单。订阅只存在这台设备的浏览器里，不需要登录。
         </p>
       </section>
 
@@ -67,7 +74,7 @@ export function FollowingPage() {
         {tracked.length === 0 ? (
           <div className="empty-state">
             <h3>还没有追踪任何事件</h3>
-            <p>点开首页头条或三张重点卡片，在专题页点「追踪事件」，它就会出现在这里。</p>
+            <p>点开首页「今日重点」里任意一条，在专题页点「追踪事件」，它就会进入这份每日更新的清单。</p>
             <Link to="/">去今天这一期</Link>
           </div>
         ) : (
@@ -79,14 +86,22 @@ export function FollowingPage() {
         {available.length > 0 && (
           <section className="follow-suggest">
             <div className="rail-title">
-              <span>{tracked.length === 0 ? '正在跟踪的事件' : '还可以追踪'}</span>
+              <span>还可以追踪</span>
               <b>OPEN STORYLINES</b>
             </div>
-            <div
-              className="archive-list"
-              style={{ borderTop: '1px solid var(--ink)', borderBottom: '1px solid var(--ink)' }}
-            >
-              {available.map((s) => row(s, false))}
+            <p className="rail-intro">下面这些事件目前没有特别跟踪，也不会逐日汇总进展。点「追踪」后才会进入上面的清单。</p>
+            <div className="candidate-list">
+              {available.map((s) => (
+                <div className="candidate-row" key={s.id}>
+                  <Link to={`/storyline/${s.id}`}>
+                    <b>{s.title}</b>
+                    <small>{s.topic} · 更新至 {s.updatedAt ?? '—'}</small>
+                  </Link>
+                  <button className="follow" onClick={() => toggle(s.id)} aria-label={`追踪 ${s.title}`}>
+                    <Icon name="bookmark" /> 追踪
+                  </button>
+                </div>
+              ))}
             </div>
           </section>
         )}

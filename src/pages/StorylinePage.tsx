@@ -35,11 +35,16 @@ function fallbackStoryline(rawId: string): Storyline | undefined {
         { time: '关键数字', title: '可核对的数', body: (a?.metrics ?? []).map((m) => `${m.value} · ${m.label}`).join('；') },
         { time: '下一节点', title: '接下来盯什么', body: a?.takeaway?.body ?? '' },
       ],
-      background: sections[0]?.paragraphs.join(' ') ?? a?.body,
-      concepts: sections.slice(1, 4).map((s) => ({ term: s.heading, explain: s.paragraphs.join(' ') })),
+      // 兜底页绝不拼贴分析：前因、机制、影响、下一步留空，只保留事实脉络与可核对数字
+      background: '',
+      mechanism: '',
+      concepts: sections
+        .filter((s) => s.heading && !/发生了什么|数字的口径|基础版|目前已知的/.test(s.heading))
+        .slice(0, 3)
+        .map((s) => ({ term: s.heading, explain: s.paragraphs.join(' ') })),
       keyNumbers: a?.metrics,
-      impact: a?.takeaway?.body,
-      whatNext: a?.takeaway?.title,
+      impact: '',
+      whatNext: '',
       sources: (issue.sources ?? []).map((s) => s.name),
       updatedAt: issue.date,
       relatedDates: [issue.date],
@@ -83,7 +88,15 @@ export function StorylinePage() {
   const currentIssue = related[0]
   const currentNode = Math.min(currentIssue?.currentNode ?? storyline.nodes.length - 1, storyline.nodes.length - 1)
   const followed = isFollowing(storyline.id)
-  const hasDeep = !!(storyline.background || storyline.concepts?.length || storyline.keyNumbers?.length || storyline.impact)
+  const hasDeep = !!(
+    storyline.background ||
+    storyline.mechanism ||
+    storyline.bottomLine?.length ||
+    storyline.concepts?.length ||
+    storyline.keyNumbers?.length ||
+    storyline.impact ||
+    storyline.whatNext
+  )
 
   return (
     <PageShell title={storyline.title}>
@@ -147,10 +160,26 @@ export function StorylinePage() {
                 </div>
               </div>
 
+              {!!storyline.bottomLine?.length && (
+                <div className="deep-tldr">
+                  <h3>三句话结论</h3>
+                  <ol>
+                    {storyline.bottomLine.map((line, i) => <li key={`${line}-${i}`}>{line}</li>)}
+                  </ol>
+                </div>
+              )}
+
               {storyline.background && (
                 <div style={{ margin: '28px 0 32px' }}>
                   <h3 style={{ fontSize: 19, margin: '0 0 12px' }}>前因：为什么偏偏是现在</h3>
                   <p style={para}>{storyline.background}</p>
+                </div>
+              )}
+
+              {storyline.mechanism && (
+                <div style={{ margin: '0 0 32px' }}>
+                  <h3 style={{ fontSize: 19, margin: '0 0 12px' }}>机制：这一步怎么传导到结果</h3>
+                  <p style={para}>{storyline.mechanism}</p>
                 </div>
               )}
 
@@ -159,9 +188,10 @@ export function StorylinePage() {
                   <h3 style={{ fontSize: 19, margin: '0 0 12px' }}>关键数字</h3>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
                     {storyline.keyNumbers.map((n) => (
-                      <div key={n.label} style={{ border: '1px solid var(--ink)', padding: '14px 18px', minWidth: 170 }}>
-                        <b style={{ display: 'block', fontSize: 26 }}>{n.value}</b>
-                        <span style={{ fontSize: 12, opacity: 0.75 }}>{n.label}</span>
+                      <div key={n.label} className="key-number-card">
+                        <b>{n.value}</b>
+                        <span>{n.label}</span>
+                        {n.note && <small>{n.note}</small>}
                       </div>
                     ))}
                   </div>
@@ -188,9 +218,30 @@ export function StorylinePage() {
               )}
 
               {storyline.whatNext && (
-                <div style={{ margin: '0 0 8px' }}>
+                <div style={{ margin: '0 0 32px' }}>
                   <h3 style={{ fontSize: 19, margin: '0 0 12px' }}>接下来盯什么</h3>
                   <p style={para}>{storyline.whatNext}</p>
+                </div>
+              )}
+
+              {!!storyline.stances?.length && (
+                <div style={{ margin: '0 0 32px' }}>
+                  <h3 style={{ fontSize: 19, margin: '0 0 12px' }}>各方说法</h3>
+                  {storyline.stances.map((s) => (
+                    <div key={s.source} className="stance-row">
+                      <b>{s.source}</b>
+                      <p style={para}>{s.point}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {!!storyline.openQuestions?.length && (
+                <div style={{ margin: '0 0 8px' }}>
+                  <h3 style={{ fontSize: 19, margin: '0 0 12px' }}>目前还不清楚</h3>
+                  <ul className="open-questions">
+                    {storyline.openQuestions.map((q) => <li key={q}>{q}</li>)}
+                  </ul>
                 </div>
               )}
             </section>
@@ -270,10 +321,10 @@ export function StorylinePage() {
               <b>HOW TO READ</b>
             </div>
             <p className="rail-intro">
-              事实、前因、判断分开写。时间线只记录已确认的事实节点，推测与判断放在「深度解读」里。
+              深度解读由出刊时的模型按 deep-story 规范撰写：前因、机制、带口径的数字、影响与下一步分开写，判断句以「判断：」开头，不用摘要拼贴。
             </p>
             <p className="rail-intro">
-              追踪一个事件后，它会进入「我的追踪」；每期日报出现新进展，这里会多出一个节点。
+              事件脉络只记录已确认的事实节点。点「追踪事件」后，这条事件才进入「我的追踪」，之后每天汇总新进展；不追踪则不特别跟踪。
             </p>
           </section>
         </aside>

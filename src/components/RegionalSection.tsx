@@ -33,7 +33,7 @@ export function RegionalSection({ issue }: { issue: Issue }) {
       />
 
       <div className="regional-grid">
-        {current.items.map((item) => (
+        {current.items.slice(0, 3).map((item) => (
           <article key={item.id}>
             <span>{item.tag}</span>
             <h3>{item.title}</h3>

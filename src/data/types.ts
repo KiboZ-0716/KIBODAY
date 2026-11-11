@@ -113,6 +113,7 @@ export type SideCard =
     }
   | {
       kind: 'data'
+      image?: string | null
       label: string
       caption: string
       big: string
@@ -159,8 +160,10 @@ export interface Analysis {
 export interface Trend {
   title: string
   body: string
-  momentum: 'up' | 'steady' | 'down'
-  score: number
+  /** 明确的下一个观察点（含日期/披露/指标），替代看不懂的评分条 */
+  watch?: string
+  momentum?: 'up' | 'steady' | 'down'
+  score?: number
 }
 
 export interface TimelineNode {
@@ -177,12 +180,17 @@ export interface Storyline {
   image: string | null
   credit: string
   nodes: TimelineNode[]
-  /** 以下为深度专题扩展字段，由 scripts/enrich.mjs 自动生成 */
+  /** 以下为深度专题扩展字段，由出刊模型按 deep-story.md 撰写 */
   background?: string
+  mechanism?: string
+  bottomLine?: string[]
   concepts?: { term: string; explain: string }[]
-  keyNumbers?: { value: string; label: string }[]
+  keyNumbers?: { value: string; label: string; note?: string }[]
   impact?: string
   whatNext?: string
+  stances?: { source: string; point: string }[]
+  openQuestions?: string[]
+  authoredBy?: 'model' | 'archive'
   sources?: string[]
   updatedAt?: string
   relatedDates?: string[]

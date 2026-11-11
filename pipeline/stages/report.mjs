@@ -13,13 +13,14 @@ import { ROOT, readJson, writeJson } from '../lib.mjs'
  * 原则与配图一致：永不空白，也永不拿推测冒充事实。
  */
 
-const PROMPT_ID = 'event-report'
-const PROMPT_VERSION = 'v1.2'
+const PROMPT_ID = 'deep-story'
+const PROMPT_VERSION = 'v1'
 
 export function buildReports({ dates }) {
   const CONTENT = path.join(ROOT, 'content')
   const ISSUE_DIR = path.join(ROOT, 'src', 'data', 'issues')
   const REPORTS_DIR = path.join(CONTENT, 'reports')
+  const DEEP_DIR = path.join(CONTENT, 'deep')
   const reports = []
 
   for (const date of dates) {
@@ -39,8 +40,15 @@ export function buildReports({ dates }) {
         url: a.url,
       }))
 
-      const presetPath = path.join(REPORTS_DIR, `${brief.id}.json`)
-      const preset = fs.existsSync(presetPath) ? readJson(presetPath) : null
+      // 深挖正文由出刊时的模型按 content/prompts/deep-story.md 撰写，
+      // 优先读 content/deep/{briefId}.json；旧版 content/reports 作兼容。
+      const deepPath = path.join(DEEP_DIR, `${brief.id}.json`)
+      const legacyPath = path.join(REPORTS_DIR, `${brief.id}.json`)
+      const preset = fs.existsSync(deepPath)
+        ? readJson(deepPath)
+        : fs.existsSync(legacyPath)
+          ? readJson(legacyPath)
+          : null
 
       if (preset) {
         reports.push({
@@ -61,9 +69,9 @@ export function buildReports({ dates }) {
             level: 'deep',
             promptId: PROMPT_ID,
             promptVersion: PROMPT_VERSION,
-            model: 'K!B0 事件报告模型',
+            model: '出刊模型按 deep-story 规范撰写',
             generatedAt: issue.generatedAt,
-            note: '按 event-report 提示词生成，编辑复核。数字与结论均来自同源报道，未做推测填充。',
+            note: '由模型按 content/prompts/deep-story.md 写成完整专题分析，非脚本拼贴；事实与判断分开，数字带口径。',
           },
         })
         continue

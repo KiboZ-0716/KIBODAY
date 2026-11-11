@@ -50,11 +50,13 @@ export function compose({ source, brief, assets, no }) {
     return !regionalTitles.some((r) => titleDuplicate(r, t))
   })
 
-  const cards = (brief.cards ?? []).map((card) =>
-    card.kind === 'image'
+  // 四张重点卡（含数据卡）都要有各自的主题配图，避免整屏同一张图
+  const cards = (brief.cards ?? []).map((card) => {
+    const image = card.imageKey ? mediaPath(assets, card.imageKey, 'lg') : null
+    return card.kind === 'image'
       ? {
           kind: 'image',
-          image: mediaPath(assets, card.imageKey, 'lg'),
+          image,
           credit: card.credit ?? leadEvent.imageCredit ?? 'K!B0',
           label: card.label,
           title: card.title,
@@ -62,8 +64,8 @@ export function compose({ source, brief, assets, no }) {
           readMin: card.readMin ?? 3,
           to: card.to ?? `/issue/${no}/briefs`,
         }
-      : card,
-  )
+      : { ...card, image }
+  })
 
   const sourceMatrix = leadEvent.articles
     .filter((a, i, arr) => arr.findIndex((b) => b.source === a.source) === i)

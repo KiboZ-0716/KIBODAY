@@ -1,38 +1,29 @@
 import type { Issue } from '@/data'
 import { Icon } from './Icon'
 
-const MOMENTUM = {
-  up: { label: '升温 ↑', className: 'up' },
-  steady: { label: '持续 →', className: 'steady' },
-  down: { label: '降温 ↓', className: 'down' },
-} as const
-
 export function Rail({ issue, onOpenMethod }: { issue: Issue; onOpenMethod: () => void }) {
   return (
     <aside className="rail">
-      <section className="rail-section">
+      <section className="rail-section watch-section">
         <div className="rail-title">
-          <span>趋势评分</span>
-          <b>AI SIGNAL SCORE</b>
+          <span>接下来看什么</span>
+          <b>WHAT TO WATCH</b>
         </div>
-        <p className="rail-intro">基于事件数量、信源权重与近 7 日变化自动计算，仅供研判参考。</p>
+        <p className="rail-intro">不给分数。下面每条只说清两件事：正在发生什么，以及哪天该回来核对哪个数。</p>
 
-        {issue.trends.map((trend, index) => {
-          const momentum = MOMENTUM[trend.momentum]
-          return (
-            <div className="radar-item" key={trend.title}>
-              <div>
-                <span>{String(index + 1).padStart(2, '0')}</span>
-                <b className={momentum.className}>{momentum.label}</b>
-              </div>
+        {issue.trends.map((trend, index) => (
+          <div className="watch-item" key={trend.title}>
+            <div className="watch-head">
+              <span>{String(index + 1).padStart(2, '0')}</span>
               <h3>{trend.title}</h3>
-              <p>{trend.body}</p>
-              <div className="meter">
-                <i style={{ width: `${trend.score}%` }} />
-              </div>
             </div>
-          )
-        })}
+            <p>{trend.body}</p>
+            <div className="watch-next">
+              <b>下一个观察点</b>
+              <span>{trend.watch ?? '关注后续官方披露与实施公告'}</span>
+            </div>
+          </div>
+        ))}
       </section>
 
       <section className="rail-section sources">

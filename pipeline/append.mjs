@@ -81,9 +81,9 @@ async function main() {
     const oldReports = readJson(path.join(ROOT, 'src', 'data', 'reports.json'), { reports: [] }).reports ?? []
     const todayReports = buildReports({ dates: [date] })
     writeJson(path.join(ROOT, 'src', 'data', 'reports.json'), {
-      promptId: 'event-report',
-      promptVersion: 'v1.2',
-      promptPath: 'content/prompts/event-report.md',
+      promptId: 'deep-story',
+      promptVersion: 'v1',
+      promptPath: 'content/prompts/deep-story.md',
       generatedAt: new Date().toISOString(),
       reports: [...todayReports, ...oldReports.filter((r) => r.date !== date)],
     })
