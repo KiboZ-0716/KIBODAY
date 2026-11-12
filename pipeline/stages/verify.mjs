@@ -78,17 +78,29 @@ export function verify(events, { minConfidence = 0.5, pinnedIds = [] } = {}) {
     e.confidence >= minConfidence &&
     (!e.editorialReject || (keepAllButHard && !hard(e)))
 
-  // 价值闸门是硬约束：小水花永不保底补回（读者明确说这类不看了）。
-  // 只有「影响面不足」这类软拒绝，在当期合格条目太少时才按重要度从高到低补到 minKeep 条，
-  // 避免某天新闻普遍平淡时出现空白日报。宁缺毋滥 ≠ 一定要凑满。
-  const MIN_KEEP = 6
+  // 价值闸门是硬约束：正常日「小水花」直接不收（读者明确说这类不看了）。
+  // 但宁缺毋滥 ≠ 可以无报：若某天新闻普遍平淡、合格条目不足 MIN_KEEP，
+  // 先按重要度补回「影响面不足」的软拒绝；连软拒绝都不够的极端情况，
+  // 才最后补回相对最好的小水花，避免 verify 返回空池导致整期出刊崩溃、
+  // 站点停在昨天（2026-11-12 已发生过一次「打开不是最新」的事故）。
+  // 补回只发生在 clean 不足时——当期有 11 条合格，CoreWeave / 萃华 依然被拦。
+  // 4 条即可撑起一期（头条 + 三卡 + 少量速览）。定得越低，越不会为凑数
+  // 补回小水花；正常日合格条目远多于此，闸门始终全硬。
+  const MIN_KEEP = 4
   const clean = scored.filter((e) => baseOk(e) && !e.valueReject)
   let published = clean
   if (clean.length < MIN_KEEP) {
+    const need = MIN_KEEP - clean.length
     const soft = scored
-      .filter((e) => baseOk(e) && e.valueReject && !e.smallSplash && !isSmallSplash(e.title, e.summary))
+      .filter((e) => baseOk(e) && e.valueReject && !e.smallSplash)
       .sort((a, b) => b.importance - a.importance)
-    const rescue = new Set(soft.slice(0, MIN_KEEP - clean.length))
+    const rescue = new Set(soft.slice(0, need))
+    if (rescue.size < need) {
+      const splash = scored
+        .filter((e) => baseOk(e) && e.smallSplash)
+        .sort((a, b) => b.importance - a.importance)
+      for (const e of splash.slice(0, need - rescue.size)) rescue.add(e)
+    }
     published = scored.filter((e) => clean.includes(e) || rescue.has(e))
   }
   const hidden = scored.filter((e) => !published.includes(e))
