@@ -2130,6 +2130,53 @@ a.side-story:hover .mini-meta span {
 .open-questions { margin: 0; padding-left: 20px; }
 .open-questions li { font-size: 15px; line-height: 1.9; margin-bottom: 6px; }
 
+/* ===== 正文划重点：降低专题/深挖长文的阅读障碍 ===== */
+.rt-p {
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--ink);
+  margin: 0 0 14px;
+  white-space: pre-wrap;
+}
+.rt-p:last-child { margin-bottom: 0; }
+
+/* 各详情页沿用原有版式，仅统一拆段后的段间距 */
+.deep-section p.rt-p { font-size: 15px; line-height: 1.95; color: #2a2a26; margin: 0 0 13px; }
+.track-item p.rt-p { max-width: 720px; }
+.stance-row p.rt-p { margin: 0 0 10px; }
+
+/* 荧光笔加粗 = 模型标出的关键判断 / 结论 */
+.rt-strong {
+  font-weight: 700;
+  color: var(--ink);
+  background: linear-gradient(transparent 58%, rgba(213, 235, 61, 0.72) 58%);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* 「判断：」开头的推论句，与事实句区分开 */
+.rt-judge {
+  font-weight: 700;
+  color: var(--red);
+  background: rgba(216, 65, 47, 0.075);
+  padding: 1px 4px;
+  border-radius: 2px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* 带口径的关键数字，克制标红，避免满屏花 */
+.rt-num {
+  font-weight: 700;
+  color: var(--red);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 600px) {
+  .rt-p, .deep-section p.rt-p { font-size: 15.5px; line-height: 1.95; }
+  .rt-strong { background: linear-gradient(transparent 58%, rgba(213, 235, 61, 0.6) 58%); }
+}
+
 @media (max-width: 900px) {
   .top-lead { grid-template-columns: minmax(0, 1fr); }
   .top-lead-media { min-height: 200px; }

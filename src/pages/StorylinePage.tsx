@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getStoryline, issues, pad } from '@/data'
 import type { Storyline } from '@/data'
@@ -7,6 +6,7 @@ import { PageShell } from '@/components/PageShell'
 import { MediaImage } from '@/components/MediaImage'
 import { Icon } from '@/components/Icon'
 import { ArchiveRow } from '@/components/ArchiveSection'
+import { InlineRich, RichText, stripMarks } from '@/components/RichText'
 
 /**
  * 兜底：即便内容包里缺了某个专题，也从该期卡片 + 深度分析现场拼一份，
@@ -51,14 +51,6 @@ function fallbackStoryline(rawId: string): Storyline | undefined {
     }
   }
   return undefined
-}
-
-const para: CSSProperties = {
-  fontSize: '15px',
-  lineHeight: 1.9,
-  color: 'var(--ink)',
-  margin: '0 0 14px',
-  whiteSpace: 'pre-wrap',
 }
 
 export function StorylinePage() {
@@ -118,8 +110,8 @@ export function StorylinePage() {
         )}
         <div className="hero-copy">
           <span className="card-label">{storyline.topic}</span>
-          <h1>{storyline.title}</h1>
-          <p className="hero-summary">{storyline.summary}</p>
+          <h1>{stripMarks(storyline.title)}</h1>
+          <p className="hero-summary">{stripMarks(storyline.summary)}</p>
           <div className="hero-stats">
             <div>
               <b>{storyline.nodes.length}</b>
@@ -164,7 +156,9 @@ export function StorylinePage() {
                 <div className="deep-tldr">
                   <h3>三句话结论</h3>
                   <ol>
-                    {storyline.bottomLine.map((line, i) => <li key={`${line}-${i}`}>{line}</li>)}
+                    {storyline.bottomLine.map((line, i) => (
+                      <li key={`${line}-${i}`}><InlineRich text={line} /></li>
+                    ))}
                   </ol>
                 </div>
               )}
@@ -172,14 +166,14 @@ export function StorylinePage() {
               {storyline.background && (
                 <div style={{ margin: '28px 0 32px' }}>
                   <h3 style={{ fontSize: 19, margin: '0 0 12px' }}>前因：为什么偏偏是现在</h3>
-                  <p style={para}>{storyline.background}</p>
+                  <RichText text={storyline.background} />
                 </div>
               )}
 
               {storyline.mechanism && (
                 <div style={{ margin: '0 0 32px' }}>
                   <h3 style={{ fontSize: 19, margin: '0 0 12px' }}>机制：这一步怎么传导到结果</h3>
-                  <p style={para}>{storyline.mechanism}</p>
+                  <RichText text={storyline.mechanism} />
                 </div>
               )}
 
@@ -189,9 +183,9 @@ export function StorylinePage() {
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
                     {storyline.keyNumbers.map((n) => (
                       <div key={n.label} className="key-number-card">
-                        <b>{n.value}</b>
-                        <span>{n.label}</span>
-                        {n.note && <small>{n.note}</small>}
+                        <b>{stripMarks(n.value)}</b>
+                        <span>{stripMarks(n.label)}</span>
+                        {n.note && <small>{stripMarks(n.note)}</small>}
                       </div>
                     ))}
                   </div>
@@ -203,8 +197,8 @@ export function StorylinePage() {
                   <h3 style={{ fontSize: 19, margin: '0 0 12px' }}>概念与口径</h3>
                   {storyline.concepts.map((c) => (
                     <div key={c.term} style={{ marginBottom: 16 }}>
-                      <b style={{ display: 'block', marginBottom: 4 }}>{c.term}</b>
-                      <p style={para}>{c.explain}</p>
+                      <b style={{ display: 'block', marginBottom: 4 }}>{stripMarks(c.term)}</b>
+                      <RichText text={c.explain} />
                     </div>
                   ))}
                 </div>
@@ -213,14 +207,14 @@ export function StorylinePage() {
               {storyline.impact && (
                 <div style={{ margin: '0 0 32px' }}>
                   <h3 style={{ fontSize: 19, margin: '0 0 12px' }}>影响到谁</h3>
-                  <p style={para}>{storyline.impact}</p>
+                  <RichText text={storyline.impact} />
                 </div>
               )}
 
               {storyline.whatNext && (
                 <div style={{ margin: '0 0 32px' }}>
                   <h3 style={{ fontSize: 19, margin: '0 0 12px' }}>接下来盯什么</h3>
-                  <p style={para}>{storyline.whatNext}</p>
+                  <RichText text={storyline.whatNext} />
                 </div>
               )}
 
@@ -229,8 +223,8 @@ export function StorylinePage() {
                   <h3 style={{ fontSize: 19, margin: '0 0 12px' }}>各方说法</h3>
                   {storyline.stances.map((s) => (
                     <div key={s.source} className="stance-row">
-                      <b>{s.source}</b>
-                      <p style={para}>{s.point}</p>
+                      <b>{stripMarks(s.source)}</b>
+                      <RichText text={s.point} />
                     </div>
                   ))}
                 </div>
@@ -240,7 +234,7 @@ export function StorylinePage() {
                 <div style={{ margin: '0 0 8px' }}>
                   <h3 style={{ fontSize: 19, margin: '0 0 12px' }}>目前还不清楚</h3>
                   <ul className="open-questions">
-                    {storyline.openQuestions.map((q) => <li key={q}>{q}</li>)}
+                    {storyline.openQuestions.map((q) => <li key={q}><InlineRich text={q} /></li>)}
                   </ul>
                 </div>
               )}
@@ -263,10 +257,10 @@ export function StorylinePage() {
                 >
                   <time>{node.time}</time>
                   <h3>
-                    {node.title}
+                    {stripMarks(node.title)}
                     {index === currentNode && <span className="track-flag">当前节点</span>}
                   </h3>
-                  <p style={{ lineHeight: 1.85 }}>{node.body}</p>
+                  <RichText text={node.body} />
                 </article>
               ))}
             </div>
@@ -322,6 +316,9 @@ export function StorylinePage() {
             </div>
             <p className="rail-intro">
               深度解读由出刊时的模型按 deep-story 规范撰写：前因、机制、带口径的数字、影响与下一步分开写，判断句以「判断：」开头，不用摘要拼贴。
+            </p>
+            <p className="rail-intro">
+              <b>荧光笔加粗</b>是关键判断，<b style={{ color: 'var(--red)' }}>红色数字</b>是可核对的量，带「判断：」的句子是推论而非事实。赶时间可以先只看这些标记。
             </p>
             <p className="rail-intro">
               事件脉络只记录已确认的事实节点。点「追踪事件」后，这条事件才进入「我的追踪」，之后每天汇总新进展；不追踪则不特别跟踪。

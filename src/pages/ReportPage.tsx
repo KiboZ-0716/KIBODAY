@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { getTopic, pad, presetReport, reportMetaInfo } from '@/data'
 import type { GeneratedReport } from '@/data/types'
 import { PageShell } from '@/components/PageShell'
+import { InlineRich, RichText, stripMarks } from '@/components/RichText'
 import {
   describeError,
   generateReport,
@@ -114,8 +115,8 @@ export function ReportPage() {
           EVENT REPORT · NO. {pad(topic.issueNo)} · {topic.date} · {topic.tag}
           {topic.city ? ` · ${topic.city}` : ''}
         </p>
-        <h1>{topic.title}</h1>
-        <p className="lede">{topic.summary}</p>
+        <h1>{stripMarks(topic.title)}</h1>
+        <p className="lede">{stripMarks(topic.summary)}</p>
 
         <div className="head-meta">
           <span>{sources.length} 个信源</span>
@@ -191,7 +192,7 @@ export function ReportPage() {
               <h2>三句话结论</h2>
               <ul>
                 {report.body.bottomLine.map((line) => (
-                  <li key={line}>{line}</li>
+                  <li key={line}><InlineRich text={line} /></li>
                 ))}
               </ul>
             </section>
@@ -199,9 +200,9 @@ export function ReportPage() {
             {report.body.sections.map((section, index) => (
               <section className="deep-section" key={`${section.heading}-${index}`}>
                 <div className="deep-section-index">{String(index + 1).padStart(2, '0')}</div>
-                <h2>{section.heading}</h2>
+                <h2>{stripMarks(section.heading)}</h2>
                 {section.paragraphs.map((paragraph, pIndex) => (
-                  <p key={`${index}-${pIndex}`}>{paragraph}</p>
+                  <RichText key={`${index}-${pIndex}`} text={paragraph} />
                 ))}
               </section>
             ))}
@@ -215,7 +216,7 @@ export function ReportPage() {
                   {report.body.facts.map((fact) => (
                     <li key={fact}>
                       <b>·</b>
-                      <span>{fact}</span>
+                      <span><InlineRich text={fact} /></span>
                     </li>
                   ))}
                 </ul>
@@ -228,8 +229,8 @@ export function ReportPage() {
                 <ul className="citation-list">
                   {report.body.stances.map((stance) => (
                     <li key={`${stance.source}-${stance.point}`}>
-                      <b>{stance.source}</b>
-                      <span>{stance.point}</span>
+                      <b>{stripMarks(stance.source)}</b>
+                      <span><InlineRich text={stance.point} /></span>
                     </li>
                   ))}
                 </ul>
@@ -243,7 +244,7 @@ export function ReportPage() {
                   {report.body.openQuestions.map((question) => (
                     <li key={question}>
                       <b>?</b>
-                      <span>{question}</span>
+                      <span><InlineRich text={question} /></span>
                     </li>
                   ))}
                 </ul>
@@ -290,6 +291,7 @@ export function ReportPage() {
         {reportMetaInfo.promptVersion}）撰写：前因、机制、带口径的数字、影响与下一步分开写，
         判断句以「判断：」开头，事实与判断不混。每天出刊时模型会为当期事件重新撰写，
         点开即为最新一版的模型产物，不需要在浏览器里等待生成。
+        正文里<b>荧光笔加粗</b>是关键判断，<b style={{ color: 'var(--red)' }}>红色数字</b>是可核对的量，赶时间可以先只看标记处。
       </p>
     </PageShell>
   )
