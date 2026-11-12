@@ -1,5 +1,5 @@
 import { clamp, weekdayCn } from '../lib.mjs'
-import { importanceScore, importanceReason } from '../importance.mjs'
+import { importanceScore, importanceReason, focusScore } from '../importance.mjs'
 
 /**
  * 编排成刊：把核验后的事件 + 编辑意图（brief）拼成站点消费的 Issue。
@@ -188,14 +188,20 @@ function withRegionalIds(regional, date) {
  *
  * 旧口径把「营收 / 订单 / 股价 / 市值 / 财报」当加分项，结果单一非龙头公司的
  * 季报、一只退市个股被顶到速览前列（有数字、没水花）。现在只认
- * 「影响面 × 社会共鸣 × 结构性后果 × 主体量级」，国内外同一把尺；
- * verify.mjs 用同一把尺做准入，两处口径不会漂移。
+ * 「影响面 × 社会共鸣（含网上舆情讨论度）× 结构性后果 × 主体量级」，
+ * 国内外同一把尺；verify.mjs 用同一把尺做准入，两处口径不会漂移。
+ *
+ * 读者新增要求「网上舆情讨论度高的应该重点关注」：即使编辑显式标了较低的
+ * importance，讨论度大爆（buzz=2）的条目也会被 focusScore 拉到前排，
+ * 提示词同时要求把它们放进今日重点四席之一，不让热度高的社会事件沉底。
  */
 function importanceOf(event, brief) {
   const a0 = event.articles[0]
   const explicit = brief.importance?.[a0.id] ?? a0.importance
-  if (Number.isFinite(Number(explicit)) && Number(explicit) > 0) return Number(explicit)
-  return importanceScore(event)
+  const base = Number.isFinite(Number(explicit)) && Number(explicit) > 0
+    ? Number(explicit)
+    : importanceScore(event)
+  return focusScore(event, base)
 }
 
 /** FNV-1a 确定性 hash：同一期同一标题必得同一组图，不同期必然换图 */

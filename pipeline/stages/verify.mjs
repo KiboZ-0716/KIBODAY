@@ -1,13 +1,28 @@
 import { clamp } from '../lib.mjs'
-import { importanceScore, isSmallSplash, MIN_IMPORTANCE } from '../importance.mjs'
+import {
+  importanceScore,
+  isSmallSplash,
+  isSocial,
+  buzzLevel,
+  hasBuzzOverride,
+  isPureBuzz,
+  MIN_IMPORTANCE,
+  MIN_IMPORTANCE_SOCIAL,
+} from '../importance.mjs'
 
 /**
  * 发布闸门。
  *
  * 三层判断：
  *   1) 编辑闸门 —— 把「有标题、零信息量」的内容挡在外面，靠代码硬拦。
- *   2) 价值闸门（2026-11-12 新增）—— 按「影响面 × 社会共鸣 × 结构性后果」
- *      打分，低于下限、或标题是「没大水花的公司小动作」的一律不进日报。
+ *   2) 价值闸门（2026-11-12 新增，同日二次调整）—— 按「影响面 × 社会共鸣
+ *      （含网上舆情讨论度）× 结构性后果 × 主体量级」打分。
+ *      · 社会新闻 / 公共事件用更低的 MIN_IMPORTANCE_SOCIAL —— 读者要求
+ *        「对社会新闻宽松一点」，宽松**只给这一类**；
+ *      · 财经与公司条目仍用 MIN_IMPORTANCE，不放宽；
+ *      · 小水花（非龙头季报 / 个股交易 / 退市流程）照旧硬拦，唯一例外是
+ *        「讨论度大爆 + 已落到可核对公共后果」；
+ *      · 讨论度大爆本身不豁免黑名单，只提权（focusScore 在 compose 里）。
  *      对应 content/prompts/source-guide.md 第二条；宁缺毋滥，带最低条数保底。
  *   3) 完整性闸门 —— 摘要过短、无标签、标题过短 → 信息不足，不进日报。
  *
@@ -37,19 +52,26 @@ export function verify(events, { minConfidence = 0.5, pinnedIds = [] } = {}) {
     // ---- 编辑闸门 ----
     const gate = editorialGate(title, summary)
 
-    // ---- 价值闸门（影响面 × 社会共鸣 × 结构性后果）----
+    // ---- 价值闸门（影响面 × 舆情讨论度 × 结构性后果 × 主体量级）----
     // 打分需要 sourceCount，这里先补上再算。小水花只看标题，摘要写得再热闹也救不回来。
     const withCount = { ...event, sourceCount }
     const importance = importanceScore(withCount)
-    const smallSplash = isSmallSplash(title, summary)
+    const social = isSocial(withCount)
+    // 「宽松」只落在社会新闻：公共事件用更低的准入线，公司/财经条目维持原线。
+    const threshold = social ? MIN_IMPORTANCE_SOCIAL : MIN_IMPORTANCE
+    // 唯一豁免：全网大爆讨论 + 已落到立案/判决/召回/处罚等可核对公共后果。
+    // CoreWeave 季报、萃华退市没有讨论度也没有公共后果，照样拦死。
+    const smallSplash = isSmallSplash(title, summary) && !hasBuzzOverride(withCount)
     const isPinned = event.articles.some((a) => pinned.has(a.id))
     const valueReject = isPinned
       ? null
       : smallSplash
         ? '没大水花的公司小动作（非龙头季报 / 个股交易 / 退市流程）'
-        : importance < MIN_IMPORTANCE
-          ? '影响面与社会共鸣不足，不够上刊'
-          : null
+        : isPureBuzz(withCount)
+          ? '只有网上热度、没有可核对后果'
+          : importance < threshold
+            ? '影响面与社会共鸣不足，不够上刊'
+            : null
 
     return {
       ...withCount,
@@ -80,25 +102,28 @@ export function verify(events, { minConfidence = 0.5, pinnedIds = [] } = {}) {
 
   // 价值闸门是硬约束：正常日「小水花」直接不收（读者明确说这类不看了）。
   // 但宁缺毋滥 ≠ 可以无报：若某天新闻普遍平淡、合格条目不足 MIN_KEEP，
-  // 先按重要度补回「影响面不足」的软拒绝；连软拒绝都不够的极端情况，
+  // 先补回「影响面不足」的软拒绝；连软拒绝都不够的极端情况，
   // 才最后补回相对最好的小水花，避免 verify 返回空池导致整期出刊崩溃、
   // 站点停在昨天（2026-11-12 已发生过一次「打开不是最新」的事故）。
   // 补回只发生在 clean 不足时——当期有 11 条合格，CoreWeave / 萃华 依然被拦。
-  // 4 条即可撑起一期（头条 + 三卡 + 少量速览）。定得越低，越不会为凑数
-  // 补回小水花；正常日合格条目远多于此，闸门始终全硬。
+  // 补位顺序也体现「对社会新闻宽松」：社会新闻 > 讨论度高的 > 纯按分数，
+  // 绝不为了凑数优先补一条公司财报。4 条即可撑起一期，定得越低越不凑数。
   const MIN_KEEP = 4
+  // 补位优先级：社会新闻 +2、讨论度各 +1，最后才看重要度小数
+  const rescueRank = (e) => (isSocial(e) ? 2 : 0) + buzzLevel(e) + e.importance / 10
+  const byRescue = (a, b) => rescueRank(b) - rescueRank(a) || b.importance - a.importance
   const clean = scored.filter((e) => baseOk(e) && !e.valueReject)
   let published = clean
   if (clean.length < MIN_KEEP) {
     const need = MIN_KEEP - clean.length
     const soft = scored
       .filter((e) => baseOk(e) && e.valueReject && !e.smallSplash)
-      .sort((a, b) => b.importance - a.importance)
+      .sort(byRescue)
     const rescue = new Set(soft.slice(0, need))
     if (rescue.size < need) {
       const splash = scored
         .filter((e) => baseOk(e) && e.smallSplash)
-        .sort((a, b) => b.importance - a.importance)
+        .sort(byRescue)
       for (const e of splash.slice(0, need - rescue.size)) rescue.add(e)
     }
     published = scored.filter((e) => clean.includes(e) || rescue.has(e))

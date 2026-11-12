@@ -1,19 +1,27 @@
 import { clamp } from './lib.mjs'
 
 /**
- * 重要度单一真源：影响面 × 社会共鸣 × 结构性后果。
+ * 重要度单一真源：影响面 × 社会共鸣（含网上舆情讨论度）× 结构性后果 × 主体量级。
  *
  * 背景（2026-11-12 读者反馈）：旧口径把「营收 / 订单 / 股价 / 市值 / 财报」
  * 这类题材词当加分项，结果单一非龙头公司的季报（CoreWeave）、一只退市个股
  * （萃华）被顶到速览前列——有数字、没水花、也没写清凭什么值得看。
  *
- * 现在三条硬原则：
- *  1. 加分只给「影响面（谁被改变、多少人）」「社会共鸣（有没有大范围公共讨论）」
- *     「结构性后果（规则 / 钱 / 责任是否真的变了）」「主体量级（国内外同一把尺）」；
+ * 同日二次调整（读者进一步明确）：
+ *  - 「宽松一点」只针对社会新闻 / 公共事件，**不是全局放宽**。
+ *    社会新闻走 MIN_IMPORTANCE_SOCIAL（更低），公司财报、退市、股价那类
+ *    小水花仍按 MIN_IMPORTANCE 硬拦，不放宽、不回流。
+ *  - 网上舆情讨论度从「共鸣的一个词」升为**一等维度**：buzzLevel 分 0/1/2，
+ *    大爆（2）加权并触发「重点关注」（速览前排 / 今日重点四席），
+ *    讨论度必须由提示词要求写清量级（热搜位次、讨论量、持续天数），
+ *    且事实仍须回溯 A/B 层核实——纯情绪、明星八卦不算讨论度。
+ *
+ * 三条硬原则：
+ *  1. 加分只给「影响面」「社会共鸣 / 舆情讨论度」「结构性后果」「主体量级」；
  *     信源数量降为弱信号，避免「转载多」被当成「重要」。
- *  2. 标题命中「小水花」（个股交易、退市流程、单一公司财报营收、股价市值波动）
- *     且标题里没有国家级 / 龙头 / 监管 / 公共后果信号 → 直接判为不该上刊。
- *  3. 低于 MIN_IMPORTANCE 的条目不进日报，宁缺毋滥；verify 层带防空版保底。
+ *  2. 标题命中「小水花」且没有国家级 / 龙头 / 监管 / 公共后果信号，
+ *     且**没有「大爆讨论 + 可核对公共后果」的豁免** → 判为不该上刊。
+ *  3. 低于准入线的条目不进日报，宁缺毋滥；verify 层带防空版保底。
  *
  * compose.mjs（排序）与 verify.mjs（准入）共用本文件，避免两处口径漂移。
  */
@@ -22,21 +30,29 @@ import { clamp } from './lib.mjs'
 const SCOPE =
   /全国|全域|所有|全部|千家万户|亿人|万人|亿用户|全民|亿亩|统一|覆盖\s*\d|涉及\s*\d+\s*(亿|万)|每个人|每位|价格|药价|电价|油价|利率|税率|关税|医保|社保|养老金|学费|工资|房贷|月供|票价|最低工资|放假|节假日|限行|管制|疏散|禁令|召回|停产|停运|停课|供应链|产业链|全球|多国|跨境|国际市场|大范围|多地|跨省|全体|普遍/
 
-/** 社会共鸣：大范围公共讨论的证据（含「微博 / 抖音大爆热搜」这类线索，但必须落到可核对后果） */
-const RESONANCE =
-  /热搜|热榜|刷屏|全网|舆论|冲上|登顶|霸榜|亿次|万条|大量网友|网友|公众|民意|集体|联名|请愿|抗议|声援|广泛关注|持续发酵|关注度|共鸣|刷爆|引发.{0,8}(讨论|争议|质疑|热议|关注)|登上.{0,6}榜/
+/**
+ * 网上舆情讨论度 · 大爆（2）：热搜前列 / 霸榜 / 刷屏 / 亿次级 / 多平台 / 持续在榜，
+ * 或带可核对量级（讨论量、阅读量、转发量、在榜天数）。
+ * 这是读者新加的一等信号，命中即进入「重点关注」通道。
+ */
+const BUZZ_STRONG =
+  /热搜(第|榜首|前三|前十|第一|前列)|登顶热搜|热搜登顶|霸榜|刷屏|全网(热议|刷屏|关注)|亿次(阅读|播放|讨论|浏览)|千万(次|条|人)|讨论量|阅读量\s*\d|播放量\s*\d|转发(量|超|破)|评论\s*\d+\s*(万|亿)|多平台|多个平台|连续.{0,6}(热搜|在榜|霸榜)|持续.{0,6}(在榜|发酵|热议)|持续多日|登上.{0,6}榜首|舆情(发酵|沸腾)|讨论度(很|极|超)?高|全网讨论/
 
-/** 结构性后果：规则、钱、责任真的变了，且可核对 */
+/** 网上舆情讨论度 · 有讨论（1）：有公共讨论证据，但未到大爆量级 */
+const BUZZ_MILD =
+  /热搜|热榜|舆论|冲上|关注度|大量网友|网友(热议|质疑|讨论)|公众|民意|集体|联名|请愿|抗议|声援|广泛关注|持续发酵|共鸣|引发.{0,8}(讨论|争议|质疑|热议|关注)|登上.{0,6}榜|讨论度|舆情|在榜|话题量/
+
+/** 结构性后果：规则、钱、责任真的变了，且可核对（也用于判断讨论是否落地） */
 const CONSEQUENCE =
   /伤亡|遇难|死亡|失联|疏散|赔付|赔偿|退一赔三|罚款|处罚|禁令|叫停|下架|召回|问责|判决|裁定|终审|认定|立案|起诉|生效|施行|取消|纳入|剔除|暂停|终止|否决|罢免|辞职|换俘|停火|制裁|关税|吊销|判刑|获刑|责令|整改|约谈|印发|出台|表决通过|正式实施|通过.{0,6}(法案|草案|条例|办法)/
 
 /**
  * 社会新闻正向信号：公共安全、司法、公共卫生、教育医保、灾害、召回、环境。
- * 读者明确反馈「社会新闻比例低了，稍微加一点」，这类题材只要写出可核对后果，
- * 在排序里应当往前，而不是被「没有财经大数字」压到末尾或被准入下限误伤。
+ * 读者明确反馈「社会新闻比例低了」「对社会新闻宽松一点」：这类题材只要写出
+ * 可核对后果，准入走更低的 MIN_IMPORTANCE_SOCIAL，排序也不再被财经大数字压住。
  */
 const SOCIAL_SIGNAL =
-  /法院|判决|裁定|终审|法官|检察|起诉|立案|判刑|获刑|罪名|构成.{0,8}罪|事故|坍塌|火灾|爆炸|地震|暴雨|洪水|寒潮|台风|伤亡|遇难|失联|被困|疏散|救援|疫情|确诊|传染病|疫苗|疾控|医保|集采|药品|药监|召回|抽检|食品|校园|学生|学费|高考|学位|教育|养老|社保|退休|环境|污染|预警|重污染|限行|停课|停运|管制|赔付|问责|通报|消费者|欺诈|维权|退一赔三|刷单|诈/
+  /法院|判决|裁定|终审|法官|检察|起诉|立案|判刑|获罪|罪名|构成.{0,8}罪|事故|坍塌|火灾|爆炸|地震|暴雨|洪水|寒潮|台风|伤亡|遇难|失联|被困|疏散|救援|疫情|确诊|传染病|疫苗|疾控|医保|集采|药品|药监|召回|抽检|食品|校园|学生|学费|高考|学位|教育|养老|社保|退休|环境|污染|预警|重污染|限行|停课|停运|管制|赔付|问责|通报|消费者|欺诈|维权|退一赔三|刷单|诈/
 
 /** 主体量级：系统重要性主体，国内与国外同一把尺，不因是国外就降级 */
 const MAJOR_ACTOR =
@@ -57,8 +73,14 @@ const EXEMPT_TITLE =
 /** 通稿 / 无信息量（沿用旧口径） */
 const BOILERPLATE = /会议召开|圆满|揭晓|慰问|调研|建成\s*\d+\s*座/
 
-/** 准入下限：低于此分不进日报（宁缺毋滥）。保底逻辑在 verify.mjs */
+/** 通用准入下限：低于此分不进日报（宁缺毋滥）。保底逻辑在 verify.mjs */
 export const MIN_IMPORTANCE = 2.4
+
+/** 社会新闻专用准入下限：读者要求「对社会新闻宽松一点」，只在这一类下调，不全局放宽 */
+export const MIN_IMPORTANCE_SOCIAL = 1.8
+
+/** 讨论度大爆的级别：达到即进入「重点关注」通道（速览前排 / 今日重点四席） */
+export const BUZZ_FOCUS = 2
 
 /** 标题级判定：这条是不是「没大水花的公司小动作」——摘要写得再热闹也救不回来 */
 export function isSmallSplash(title, summary = '') {
@@ -68,39 +90,130 @@ export function isSmallSplash(title, summary = '') {
   return SMALL_SPLASH_TITLE.test(t)
 }
 
+/** 汇总事件里所有可用来判断讨论度与社会属性的文本 */
+function textOf(event = {}) {
+  return [
+    event.title,
+    event.summary,
+    event.why,
+    event.buzz,
+    event.discussion,
+    ...(event.tags ?? []),
+  ]
+    .filter((x) => x != null && typeof x !== 'object')
+    .join(' ')
+}
+
+/**
+ * 网上舆情讨论度：0 = 无 / 1 = 有公共讨论 / 2 = 大爆（重点关注）。
+ * 优先读模型显式标注的 buzz（数字或等级文字），否则从标题、摘要、why 里识别量级。
+ * 注意：只代表「讨论热度」，不代表事实成立——事实仍须回溯 A/B 层核实。
+ */
+export function buzzLevel(event = {}) {
+  const explicit = event.buzz ?? event.discussion ?? event.publicBuzz
+  const n = Number(explicit)
+  if (Number.isFinite(n) && n > 0) return Math.min(BUZZ_FOCUS, Math.round(n))
+  const text = textOf(event)
+  if (BUZZ_STRONG.test(text)) return 2
+  if (BUZZ_MILD.test(text)) return 1
+  return 0
+}
+
+/** 编辑（模型）标注的社会类标签，也算「这是公共事件」的信号 */
+const SOCIAL_TAGS = /社会|司法|民生|公共安全|事故|教育|医疗|卫生|环境|灾害|法治|监管|健康/
+
+/**
+ * 是否属于「社会新闻 / 公共事件」：命中社会信号、已有网上公共讨论，
+ * 或被编辑标为社会类题材。只有这一类享受更低的准入线与补位优先，
+ * 财经 / 公司条目不沾光。
+ */
+export function isSocial(event = {}) {
+  return (
+    SOCIAL_SIGNAL.test(textOf(event)) ||
+    buzzLevel(event) >= 1 ||
+    (event.tags ?? []).some((t) => SOCIAL_TAGS.test(String(t)))
+  )
+}
+
+/**
+ * 小水花的「舆情豁免」：讨论度大爆、且已经落到可核对公共后果
+ * （立案 / 判决 / 召回 / 处罚 / 监管介入 / 官方通报）。
+ * 例如某公司财报因造假被全网热议并立案，标题虽带「财报」也该按公共后果收。
+ * CoreWeave 季报、萃华退市这类没有讨论度、没有公共后果的，绝不豁免。
+ */
+export function hasBuzzOverride(event = {}) {
+  return buzzLevel(event) >= BUZZ_FOCUS && CONSEQUENCE.test(textOf(event))
+}
+
+/**
+ * 纯热度保护：网上讨论很爆，但既没有可核对后果、也没有影响面或社会事实信号。
+ * 「对社会新闻宽松」宽的是门槛，不是把口水热搜当新闻——这类仍不收。
+ */
+export function isPureBuzz(event = {}) {
+  const text = textOf(event)
+  return (
+    buzzLevel(event) >= BUZZ_FOCUS &&
+    !CONSEQUENCE.test(text) &&
+    !SCOPE.test(text) &&
+    !SOCIAL_SIGNAL.test(text)
+  )
+}
+
 /**
  * 重要度打分 1—5。编辑（模型）显式标注优先，见 compose.mjs 的 importanceOf。
  */
 export function importanceScore(event) {
   const title = String(event.title ?? '')
   const summary = String(event.summary ?? '')
-  const text = `${title} ${summary}`
+  const text = `${title} ${summary} ${event.why ?? ''}`
   const srcs = Number(event.sourceCount ?? event.articles?.length ?? 1)
+  const buzz = buzzLevel(event)
+  const hasConsequence = CONSEQUENCE.test(text)
 
   let score = 1
   score += Math.min(srcs, 3) * 0.4 // 多信源是弱信号：转载多 ≠ 重要
-  if (SCOPE.test(text)) score += 1.5      // 影响面
-  if (RESONANCE.test(text)) score += 1.2  // 社会共鸣（含大爆热搜）
-  if (CONSEQUENCE.test(text)) score += 1.0 // 结构性后果
-  if (SOCIAL_SIGNAL.test(text)) score += 1.0 // 社会新闻正向加权（读者要求略增占比）
-  if (MAJOR_ACTOR.test(text)) score += 1.2 // 主体量级，国内外同一把尺
+  if (SCOPE.test(text)) score += 1.5        // 影响面
+  if (hasConsequence) score += 1.0          // 结构性后果
+  if (SOCIAL_SIGNAL.test(text)) score += 1.0 // 社会新闻正向加权
+  if (isSocial(event)) score += 0.4         // 社会新闻宽松：只给这一类的克制加成
+  if (MAJOR_ACTOR.test(text)) score += 1.2  // 主体量级，国内外同一把尺
+  // 网上舆情讨论度：一等维度，分级加权（替代原先笼统的「共鸣」+1.2）
+  score += buzz >= BUZZ_FOCUS ? 2.0 : buzz >= 1 ? 1.2 : 0
+  // 讨论度必须落地：大范围讨论 + 可核对公共后果，额外加权
+  if (buzz >= 1 && hasConsequence) score += 0.4
   if (/\d/.test(summary) && /所以|意味着|判断|下一步|观察点|传导|回落|改写|责任|救治|后续|影响|导致|使得|会变/.test(summary)) {
     score += 0.4
   }
   // 小水花是硬约束：即使摘要里蹭了「全球」「龙头」等词，标题是单一公司
-  // 财报 / 个股交易 / 退市流程，也不该靠影响面词救回来（但豁免词先行）。
-  if (isSmallSplash(title, summary)) score -= 2.0
+  // 财报 / 个股交易 / 退市流程也不靠影响面词救回来。
+  // 唯一例外：讨论度大爆且已落到可核对公共后果（hasBuzzOverride）。
+  if (isSmallSplash(title, summary) && !hasBuzzOverride(event)) score -= 2.0
   if (BOILERPLATE.test(title)) score -= 1.5
+  if (isPureBuzz(event)) score -= 1.5 // 只有热度、没有后果，不该靠讨论度顶到前排
 
   return Math.round(clamp(score, 1, 5) * 10) / 10
 }
 
-/** 给前端展示用的一句话：这条凭什么值得你看（影响面 / 共鸣 / 后果） */
+/**
+ * 「重点关注」加成：讨论度高的必须排到前面，即使编辑显式标了较低的 importance。
+ * compose.mjs 在 importanceOf 里统一调用，保证排序与准入共用同一把尺。
+ */
+export function focusScore(event, base) {
+  const value = Number(base)
+  if (!Number.isFinite(value)) return importanceScore(event)
+  const buzz = buzzLevel(event)
+  if (buzz >= BUZZ_FOCUS) return Math.round(clamp(Math.max(value, 3.6) + 0.6, 1, 5) * 10) / 10
+  if (buzz >= 1) return Math.round(clamp(value + 0.3, 1, 5) * 10) / 10
+  return Math.round(clamp(value, 1, 5) * 10) / 10
+}
+
+/** 给前端展示用的一句话：这条凭什么值得你看（讨论度 / 影响面 / 共鸣 / 后果） */
 export function importanceReason(event) {
-  const text = `${event.title ?? ''} ${event.summary ?? ''}`
-  if (RESONANCE.test(text)) return '引发大范围公共讨论，且已有可核对的后续'
-  if (SCOPE.test(text)) return '影响面覆盖到价格、规则或多数人的日常'
-  if (CONSEQUENCE.test(text)) return '规则、钱或责任认定发生了可核对的变化'
-  if (MAJOR_ACTOR.test(text)) return '系统重要性主体的动作，国内外同一把尺'
+  const buzz = buzzLevel(event)
+  if (buzz >= BUZZ_FOCUS) return '网上讨论度很高，且已有可核对的公共后果'
+  if (buzz >= 1) return '引发大范围公共讨论，且已有可核对的后续'
+  if (SCOPE.test(textOf(event))) return '影响面覆盖到价格、规则或多数人的日常'
+  if (CONSEQUENCE.test(textOf(event))) return '规则、钱或责任认定发生了可核对的变化'
+  if (MAJOR_ACTOR.test(textOf(event))) return '系统重要性主体的动作，国内外同一把尺'
   return ''
 }
