@@ -444,6 +444,16 @@ main,
   color: var(--acid);
 }
 
+/* 深色头条卡片用白字；浅色的持续追踪卡片要反过来，否则链接几乎看不见 */
+.timeline-card .text-button {
+  color: var(--ink);
+  margin-top: 18px;
+}
+
+.timeline-card .text-button svg {
+  color: var(--red);
+}
+
 .side-leads {
   display: grid;
   gap: 20px;
@@ -599,7 +609,8 @@ main,
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 0;
-  padding: 64px 0 76px;
+  /* 顶部不再叠 64px：今日重点自带 76px 下边距，各版块间距才一致 */
+  padding: 0 0 76px;
 }
 
 .main-column {
@@ -708,7 +719,8 @@ main,
   opacity: 0.82;
   font-size: 15px;
   line-height: 1.85;
-  max-width: 74ch;
+  /* 铺满正文列：74ch 只占 616px，右侧会空出 542px，连成一条纵向空洞 */
+  max-width: 100%;
 }
 
 .news-row--rich .news-byline {
@@ -719,7 +731,9 @@ main,
 }
 
 .news-row--rich .row-actions {
-  padding-top: 2px;
+  /* 与整行垂直居中，避免按钮孤悬右上角、旁边留一大片白 */
+  align-self: center;
+  padding-top: 0;
 }
 
 .row-arrow {
@@ -1174,7 +1188,8 @@ main,
 
 .regional-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* 列数随条目数收缩：当期只有 2 条时不能再留第 3 个空格子 */
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   border: 1px solid var(--ink);
 }
 
@@ -1508,7 +1523,7 @@ main,
     flex-wrap: wrap;
   }
   .content-grid {
-    padding-top: 46px;
+    padding-top: 0;
   }
   .rail {
     border-left: 0;

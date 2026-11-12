@@ -1,4 +1,5 @@
-import { HashRouter, Route, Routes } from 'react-router-dom'
+import { useLayoutEffect } from 'react'
+import { HashRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { UiProvider } from '@/lib/ui'
 import { PageShell } from '@/components/PageShell'
 import { getContentStatus } from '@/lib/livecontent'
@@ -17,6 +18,7 @@ export default function App() {
   return (
     <HashRouter>
       <UiProvider>
+        <ScrollToTop />
         <ContentDebugBadge />
         <Routes>
           {/* 首页直接渲染「今日」页：无参数时 TodayPage 自动取最新一期，
@@ -37,6 +39,21 @@ export default function App() {
       </UiProvider>
     </HashRouter>
   )
+}
+
+/**
+ * 路由切换统一回到顶部。
+ * 之前只有首页、周报页各自做，其余页面会沿用上一页的滚动位置；
+ * 从首页底部点「追踪管理」时，新页高度更矮，scrollY 被裁到文档底部，
+ * 读者一进去就看到页尾。用 layout effect 在绘制前归零，避免闪一下。
+ * 只认 pathname：页内筛选（?tag= / ?q=）与锚点跳转不触发。
+ */
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+  return null
 }
 
 /** 只在 ?debug 打开时显示，用于确认页面用的是云端内容包还是构建期数据 */
