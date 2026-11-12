@@ -1,4 +1,5 @@
 import { clamp, weekdayCn } from '../lib.mjs'
+import { importanceScore, importanceReason } from '../importance.mjs'
 
 /**
  * 编排成刊：把核验后的事件 + 编辑意图（brief）拼成站点消费的 Issue。
@@ -39,6 +40,9 @@ export function compose({ source, brief, assets, no }) {
     source: event.sources[0],
     sources: event.sourceCount,
     importance,
+    // 「为什么值得看」：一句话讲清影响面 / 共鸣 / 后果，避免读者面对一个裸标题
+    // 不知道这条凭什么排在前面。优先用编辑（模型）写的 why，其次按信号自动兜底。
+    why: trim(event.why || importanceReason(event), 46) || '',
     // 摘要是读者真正读到的正文（首页速览直接渲染），不再砍到 64 字。
     // 规范见 content/prompts/source-guide.md 第五条：含增量事实 / 为什么是现在 / 所以呢 / 下一步。
     summary: trim(event.summary, 200),
@@ -180,28 +184,18 @@ function withRegionalIds(regional, date) {
 }
 
 /**
- * 重要度：编辑标注优先（1—5），否则按可核对信号打分，保证「重要的排前面」。
- * 财经与非财经信号词**分开各计一次**，避免财经词表数量多导致非财经硬新闻
- * 系统性低分（对应 feeds.json topicMix 的 60—70% 配比：配比靠多检索达成，
- * 不靠改排序，所以这里只做「打分口径校准」，不做题材配额、不给非财经加权）。
+ * 重要度：编辑（模型）显式标注优先，否则用 pipeline/importance.mjs 的单一真源打分。
+ *
+ * 旧口径把「营收 / 订单 / 股价 / 市值 / 财报」当加分项，结果单一非龙头公司的
+ * 季报、一只退市个股被顶到速览前列（有数字、没水花）。现在只认
+ * 「影响面 × 社会共鸣 × 结构性后果 × 主体量级」，国内外同一把尺；
+ * verify.mjs 用同一把尺做准入，两处口径不会漂移。
  */
-const FINANCE_SIGNAL = /利率|加息|CPI|央行|关税|监管|汇率|出口|财报|分拆|上市|GDP|就业|通胀|产能|订单|营收|估值|融资|并购|股价|市值|进出口|成交额/
-const PUBLIC_SIGNAL = /制裁|选举|判决|司法解释|事故|遇难|伤亡|灾害|疫情|确诊|疫苗|医保|集采|召回|停课|停运|管制|疏散|赔付|火灾|地震|暴雨|寒潮|污染|预警|抽检|起诉|通报|问责|学费|放假|退休|社保|学位|药品|审批|停供|限行/
-const FINANCE_UNIT = /亿|万亿|%|个百分点|美元|元\/|基点|bp|万辆|吨/
-const PUBLIC_UNIT = /人|例|户|起|所学校|毫米|摄氏度|℃|公里|万人次|万千瓦|万件|天数|省份|个省|级响应/
-
 function importanceOf(event, brief) {
-  const explicit = brief.importance?.[event.articles[0].id] ?? event.articles[0].importance
+  const a0 = event.articles[0]
+  const explicit = brief.importance?.[a0.id] ?? a0.importance
   if (Number.isFinite(Number(explicit)) && Number(explicit) > 0) return Number(explicit)
-  const text = `${event.title} ${event.summary}`
-  let score = 1
-  score += Math.min(event.sourceCount, 3) * 0.6            // 多信源交叉
-  if (FINANCE_SIGNAL.test(text)) score += 1.6
-  if (PUBLIC_SIGNAL.test(text)) score += 1.6               // 与财经同等权重，校准而非加权
-  if (FINANCE_UNIT.test(event.summary) || PUBLIC_UNIT.test(event.summary)) score += 0.7
-  if (/\d/.test(event.summary) && /所以|意味着|判断|下一步|观察点|传导|回落|改写|责任|救治|后续/.test(event.summary)) score += 0.5
-  if (/会议召开|圆满|揭晓|慰问|调研|建成\d+座/.test(event.title)) score -= 1.5
-  return Math.round(clamp(score, 1, 5) * 10) / 10
+  return importanceScore(event)
 }
 
 /** FNV-1a 确定性 hash：同一期同一标题必得同一组图，不同期必然换图 */

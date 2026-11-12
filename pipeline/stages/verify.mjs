@@ -1,17 +1,24 @@
 import { clamp } from '../lib.mjs'
+import { importanceScore, isSmallSplash, MIN_IMPORTANCE } from '../importance.mjs'
 
 /**
  * 发布闸门。
  *
- * 两层判断：
- *   1) 编辑闸门（本次新增）—— 把「有标题、零信息量」的内容挡在外面，
- *      不靠写手自觉，靠代码硬拦。对应 content/prompts/source-guide.md 第三/四/五条。
- *   2) 完整性闸门（原有）—— 摘要过短、无标签、标题过短 → 信息不足，不进日报。
+ * 三层判断：
+ *   1) 编辑闸门 —— 把「有标题、零信息量」的内容挡在外面，靠代码硬拦。
+ *   2) 价值闸门（2026-11-12 新增）—— 按「影响面 × 社会共鸣 × 结构性后果」
+ *      打分，低于下限、或标题是「没大水花的公司小动作」的一律不进日报。
+ *      对应 content/prompts/source-guide.md 第二条；宁缺毋滥，带最低条数保底。
+ *   3) 完整性闸门 —— 摘要过短、无标签、标题过短 → 信息不足，不进日报。
  *
  * 单信源不等于不可信：大量一手通报本身就是单信源。
  * 所以"隐藏"不以信源数量为准，而以信息完整度为准。
  */
-export function verify(events, { minConfidence = 0.5 } = {}) {
+export function verify(events, { minConfidence = 0.5, pinnedIds = [] } = {}) {
+  // 「今日重点」头条 / 深度分析的事件由编辑钦定、且配有完整专题，
+  // 不能被价值闸门拦掉——否则 compose.findEvent 会 fallback 到别的新闻，
+  // 把头条的信源徽标、配图张冠李戴。它们仍受编辑闸门与完整性闸门约束。
+  const pinned = new Set(pinnedIds.filter(Boolean))
   const scored = events.map((event) => {
     const sourceCount = event.sources.length
     const hasImage = Boolean(event.image)
@@ -29,14 +36,34 @@ export function verify(events, { minConfidence = 0.5 } = {}) {
 
     // ---- 编辑闸门 ----
     const gate = editorialGate(title, summary)
+
+    // ---- 价值闸门（影响面 × 社会共鸣 × 结构性后果）----
+    // 打分需要 sourceCount，这里先补上再算。小水花只看标题，摘要写得再热闹也救不回来。
+    const withCount = { ...event, sourceCount }
+    const importance = importanceScore(withCount)
+    const smallSplash = isSmallSplash(title, summary)
+    const isPinned = event.articles.some((a) => pinned.has(a.id))
+    const valueReject = isPinned
+      ? null
+      : smallSplash
+        ? '没大水花的公司小动作（非龙头季报 / 个股交易 / 退市流程）'
+        : importance < MIN_IMPORTANCE
+          ? '影响面与社会共鸣不足，不够上刊'
+          : null
+
     return {
-      ...event,
-      sourceCount,
+      ...withCount,
       verified: sourceCount >= 2,
       confidence: Number(confidence.toFixed(3)),
       complete,
       editorialReject: gate,
-      reason: gate ?? (complete ? null : summaryLength < 30 ? '摘要信息不足' : '缺少分类标签'),
+      valueReject,
+      smallSplash,
+      importance,
+      reason:
+        gate ??
+        valueReject ??
+        (complete ? null : summaryLength < 30 ? '摘要信息不足' : '缺少分类标签'),
     }
   })
 
@@ -46,12 +73,24 @@ export function verify(events, { minConfidence = 0.5 } = {}) {
   const rejected = scored.filter((e) => e.editorialReject)
   const keepAllButHard = rejected.length > scored.length * 0.4 && scored.filter(hard).length < scored.length - 4
 
-  const published = scored.filter(
-    (e) =>
-      e.complete &&
-      e.confidence >= minConfidence &&
-      (!e.editorialReject || (keepAllButHard && !hard(e))),
-  )
+  const baseOk = (e) =>
+    e.complete &&
+    e.confidence >= minConfidence &&
+    (!e.editorialReject || (keepAllButHard && !hard(e)))
+
+  // 价值闸门是硬约束：小水花永不保底补回（读者明确说这类不看了）。
+  // 只有「影响面不足」这类软拒绝，在当期合格条目太少时才按重要度从高到低补到 minKeep 条，
+  // 避免某天新闻普遍平淡时出现空白日报。宁缺毋滥 ≠ 一定要凑满。
+  const MIN_KEEP = 6
+  const clean = scored.filter((e) => baseOk(e) && !e.valueReject)
+  let published = clean
+  if (clean.length < MIN_KEEP) {
+    const soft = scored
+      .filter((e) => baseOk(e) && e.valueReject && !e.smallSplash && !isSmallSplash(e.title, e.summary))
+      .sort((a, b) => b.importance - a.importance)
+    const rescue = new Set(soft.slice(0, MIN_KEEP - clean.length))
+    published = scored.filter((e) => clean.includes(e) || rescue.has(e))
+  }
   const hidden = scored.filter((e) => !published.includes(e))
 
   return {

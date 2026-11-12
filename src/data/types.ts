@@ -25,6 +25,8 @@ export interface Brief {
   sources: number
   summary: string
   url: string
+  /** 为什么值得看：影响面 / 社会共鸣 / 结构性后果，一句话。旧期次可能没有 */
+  why?: string
 }
 
 /** 事件报告：深挖产出。deep = 按提示词模板生成；outline = 尚无完整报告时的基础版 */

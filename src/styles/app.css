@@ -724,6 +724,31 @@ main,
   letter-spacing: 0.3px;
 }
 
+/* 「为什么值得看」：把重要性写成一句可读的话，而不是让读者面对裸标题。
+   选择器带 .news-row 前缀，压过全览页的 .news-row p（后者是灰字 13px）。 */
+.news-row .news-why {
+  margin: 0 0 9px;
+  color: var(--ink);
+  opacity: 0.9;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.news-row .news-why-label {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 1px 7px;
+  border: 1px solid var(--red);
+  color: var(--red);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  vertical-align: 1px;
+  white-space: nowrap;
+}
+.news-row--rich h3 + .news-why {
+  margin-top: -2px;
+}
+
 .news-row--rich .row-actions {
   /* 与整行垂直居中，避免按钮孤悬右上角、旁边留一大片白 */
   align-self: center;

@@ -87,6 +87,12 @@ export function BriefsPage() {
               <div>
                 <span className="topic-tag">{brief.tag}</span>
                 <h3>{brief.title}</h3>
+                {brief.why && (
+                  <p className="news-why">
+                    <span className="news-why-label">为什么值得看</span>
+                    {brief.why}
+                  </p>
+                )}
                 <p>
                   {brief.summary}
                   <br />

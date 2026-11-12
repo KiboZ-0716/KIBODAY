@@ -51,6 +51,12 @@ export function BriefsSection({ issue, limit = 6 }: { issue: Issue; limit?: numb
             <div>
               <span className="topic-tag">{brief.tag}</span>
               <h3>{brief.title}</h3>
+              {brief.why && (
+                <p className="news-why">
+                  <span className="news-why-label">为什么值得看</span>
+                  {brief.why}
+                </p>
+              )}
               <p className="news-summary">{brief.summary}</p>
               <p className="news-byline">
                 {brief.source} · {brief.sources} 个信源 · 原文可核对

@@ -63,7 +63,9 @@ async function main() {
     const source = await loadSnapshot(date)
     const { articles, merged } = normalize(source.articles)
     const events = cluster(articles)
-    const verified = verify(events)
+    const verified = verify(events, {
+      pinnedIds: [brief.lead?.eventId, brief.analysis?.eventId],
+    })
     const prev = all.find((i) => i.date === date)
     const no = prev?.no ?? maxNo + 1
 

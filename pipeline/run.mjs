@@ -35,7 +35,9 @@ async function main() {
 
     const { articles, merged } = normalize(source.articles)
     const events = cluster(articles)
-    const verified = verify(events)
+    const verified = verify(events, {
+      pinnedIds: [brief.lead?.eventId, brief.analysis?.eventId],
+    })
 
     console.log(
       `\n· ${date}  抓取 ${source.articles.length} → 去重 ${articles.length}（合并 ${merged}）→ 事件 ${events.length}（隐藏 ${verified.hiddenCount}）`,
