@@ -48,7 +48,6 @@ export function BriefsSection({ issue, limit = 6 }: { issue: Issue; limit?: numb
       <div className="news-list">
         {shown.map((brief) => (
           <div className="news-row news-row--rich" key={`${brief.time}-${brief.title}`}>
-            <time>{brief.time}</time>
             <div>
               <span className="topic-tag">{brief.tag}</span>
               <h3>{brief.title}</h3>

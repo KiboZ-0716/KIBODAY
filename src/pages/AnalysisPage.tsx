@@ -113,9 +113,7 @@ export function AnalysisPage() {
                   <li key={brief.title}>
                     <Link to={`/issue/${issue.no}/briefs?q=${encodeURIComponent(brief.tag)}`}>
                       <b>{brief.title}</b>
-                      <small>
-                        {brief.time} · {brief.source}
-                      </small>
+                      <small>{brief.source}</small>
                     </Link>
                   </li>
                 ))}

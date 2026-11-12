@@ -35,7 +35,7 @@ export function BriefsPage() {
         </p>
         <h1>本期速览</h1>
         <p className="lede">
-          覆盖 {issue.window} CST 通过核验的全部事件，按发布时间倒序。每条都保留原始信源，可跳转原文核对。
+          覆盖 {issue.window} CST 通过核验的全部事件，按重要度排列。每条都保留原始信源，可跳转原文核对。
         </p>
         <div className="head-meta">
           <span>{issue.briefs.length} 条速览</span>
@@ -84,7 +84,6 @@ export function BriefsPage() {
         <div className="news-list">
           {list.map((brief) => (
             <div className="news-row" key={`${brief.time}-${brief.title}`}>
-              <time>{brief.time}</time>
               <div>
                 <span className="topic-tag">{brief.tag}</span>
                 <h3>{brief.title}</h3>
