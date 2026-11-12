@@ -6,7 +6,7 @@
  * 日报/周报任务在 push:content（写云端数据库，供旧站）之后执行本脚本，
  * 两个站点就都能「打开即最新」。
  */
-import { readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 
 const ROOT = process.cwd()
@@ -60,6 +60,18 @@ const bundle = {
 
 const body = JSON.stringify(bundle)
 writeFileSync(join(ROOT, 'live-bundle.json'), body, 'utf8')
+
+// 同步一份进 dist：站点以「同源 ./live-bundle.json」为第一通道，
+// 国内网络访问 raw.githubusercontent.com 常常超时，同源才是稳的那条。
+// dist 不存在时跳过——下次构建由 build 后置步骤再复制一次。
+try {
+  if (existsSync(join(ROOT, 'dist'))) {
+    writeFileSync(join(ROOT, 'dist', 'live-bundle.json'), body, 'utf8')
+    console.log('已同步同源内容包：dist/live-bundle.json')
+  }
+} catch (e) {
+  console.warn(`同源内容包写入 dist 失败（不影响 GitHub 推送）：${String(e.message).slice(0, 80)}`)
+}
 
 const headers = {
   Authorization: `Bearer ${token}`,

@@ -5,39 +5,74 @@
  * （全部期次、专题、周报、深挖索引），再生成今天的新内容，状态就能逐日累积，
  * 不会出现「周报永远只有 W43/W44」或「内容包被本地少量数据整包覆盖」。
  */
-import { readdirSync, rmSync, writeFileSync, mkdirSync } from 'node:fs'
+import { readdirSync, rmSync, writeFileSync, mkdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const ROOT = process.cwd()
 const DATA = join(ROOT, 'src', 'data')
 const URL = 'https://raw.githubusercontent.com/KiboZ-0716/KIBODAY/main/live-bundle.json'
+const API = 'https://api.github.com/repos/KiboZ-0716/KIBODAY/contents/live-bundle.json?ref=main'
 const FALLBACK = 'https://daily-hotspot-brief-88193.app.workbuddy.host/.cloud/database/rest/kib0_content'
 const KEY = 'wbpk_U6IarWrMqRm6vY3hw9TgUI_yJz5JfbIEEXxjgiuI57Rducv50rno1EQ'
 
-async function getBundle() {
-  // RAW 优先（CORS 开放、无鉴权）；失败再退回云数据库
+let token = process.env.GITHUB_TOKEN || ''
+if (!token) {
   try {
-    const res = await fetch(`${URL}?t=${Date.now()}`, { signal: AbortSignal.timeout(30000) })
-    if (res.ok) {
-      const b = await res.json()
-      if (Array.isArray(b?.issues) && b.issues.length) return { bundle: b, from: 'raw' }
-    }
-  } catch (e) {
-    console.log(`[自举] RAW 不可用：${e.message}`)
+    token = readFileSync(join(ROOT, '.gh_token'), 'utf8').trim()
+  } catch {
+    /* 没有 token 就跳过 API 通道 */
   }
+}
+
+async function getBundle() {
+  const ok = (b) => Array.isArray(b?.issues) && b.issues.length > 0
+
+  // 1) 云数据库优先：自家域名，国内网络也稳，通常几秒返回
   try {
     const res = await fetch(FALLBACK, {
       headers: { 'x-wb-webapp-access-key': KEY },
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(20000),
     })
     if (res.ok) {
       const rows = await res.json()
       const row = rows.find((r) => r.id === 'bundle')
-      if (row?.payload?.issues?.length) return { bundle: row.payload, from: 'cloud' }
+      if (ok(row?.payload)) return { bundle: row.payload, from: 'cloud' }
     }
   } catch (e) {
     console.log(`[自举] 云数据库不可用：${e.message}`)
   }
+
+  // 2) GitHub API（走 api.github.com，比 RAW 域名稳；内容包超过 1MB 需 raw media type）
+  if (token) {
+    try {
+      const res = await fetch(API, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/vnd.github.raw+json',
+          'User-Agent': 'kib0-bootstrap',
+        },
+        signal: AbortSignal.timeout(60000),
+      })
+      if (res.ok) {
+        const b = await res.json()
+        if (ok(b)) return { bundle: b, from: 'api' }
+      }
+    } catch (e) {
+      console.log(`[自举] GitHub API 不可用：${e.message}`)
+    }
+  }
+
+  // 3) RAW 最后兜底（国内可能极慢，给足 90 秒）
+  try {
+    const res = await fetch(`${URL}?t=${Date.now()}`, { signal: AbortSignal.timeout(90000) })
+    if (res.ok) {
+      const b = await res.json()
+      if (ok(b)) return { bundle: b, from: 'raw' }
+    }
+  } catch (e) {
+    console.log(`[自举] RAW 不可用：${e.message}`)
+  }
+
   return { bundle: null, from: 'none' }
 }
 
@@ -94,3 +129,11 @@ if (bundle.weekly?.issues?.length) {
 console.log(
   `[自举] 来源=${from} · 恢复 ${bundle.issues.length} 期（最新 ${bundle.issues[0].date}）、${bundle.storylines?.length ?? 0} 个专题、${bundle.weekly?.issues?.length ?? 0} 期周报`,
 )
+
+// 顺手把原始包写到项目根：构建后置步骤会复制进 dist，让站点以「同源」为主通道，
+// 不必再依赖国内经常超时的 raw.githubusercontent.com。
+try {
+  writeFileSync(join(ROOT, 'live-bundle.json'), JSON.stringify(bundle), 'utf8')
+} catch (e) {
+  console.log(`[自举] 写 live-bundle.json 失败：${e.message}`)
+}
