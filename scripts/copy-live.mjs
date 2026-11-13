@@ -1,9 +1,9 @@
 /**
  * 构建后置：把根目录的实时内容包复制进 dist。
  *
- * 站点前端的第一通道是同源 ./live-bundle.json —— 同域名、几十毫秒返回；
- * 而 GitHub RAW 在国内经常要几分钟甚至超时，只作为备用。
- * 少了这一步，站点就只剩「构建期数据」可用，打开会看到隔夜内容。
+ * 同源 ./live-bundle.json 是前端并发择优的通道之一（不再是「拿到就返回」的主通道）；
+ * 构建期数据与它必须同源，否则首屏会先闪一下隔夜内容。
+ * 少了这一步，站点只剩构建期数据，极端情况下会看到旧一期。
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'

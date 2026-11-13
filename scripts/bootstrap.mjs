@@ -10,9 +10,14 @@ import { join } from 'node:path'
 
 const ROOT = process.cwd()
 const DATA = join(ROOT, 'src', 'data')
-const URL = 'https://raw.githubusercontent.com/KiboZ-0716/KIBODAY/main/live-bundle.json'
-const API = 'https://api.github.com/repos/KiboZ-0716/KIBODAY/contents/live-bundle.json?ref=main'
-const FALLBACK = 'https://daily-hotspot-brief-88193.app.workbuddy.host/.cloud/database/rest/kib0_content'
+const REPO = 'KiboZ-0716/KIBODAY'
+// 唯一真源 = 仓库 main 的 live-bundle.json。@main 的 CDN 缓存 12 小时会串期，
+// 所以按 GitHub HEAD commit 锁定地址；云库只作最后兜底（旧域名/旧数据不再优先）。
+const COMMIT_API = `https://api.github.com/repos/${REPO}/commits/main`
+const CDN_BY_COMMIT = (sha) => `https://cdn.jsdelivr.net/gh/${REPO}@${sha}/live-bundle.json`
+const API = `https://api.github.com/repos/${REPO}/contents/live-bundle.json?ref=main`
+const RAW_URL = `https://raw.githubusercontent.com/${REPO}/main/live-bundle.json`
+const CLOUD = 'https://a564b245be247abf2.app.workbuddy.host/.cloud/database/rest/kib0_content'
 const KEY = 'wbpk_U6IarWrMqRm6vY3hw9TgUI_yJz5JfbIEEXxjgiuI57Rducv50rno1EQ'
 
 let token = process.env.GITHUB_TOKEN || ''
@@ -27,22 +32,27 @@ if (!token) {
 async function getBundle() {
   const ok = (b) => Array.isArray(b?.issues) && b.issues.length > 0
 
-  // 1) 云数据库优先：自家域名，国内网络也稳，通常几秒返回
+  // 1) 按 commit 锁定的 CDN：唯一真源、免 token、2—3 秒，且不会拿到缓存里的昨天
   try {
-    const res = await fetch(FALLBACK, {
-      headers: { 'x-wb-webapp-access-key': KEY },
-      signal: AbortSignal.timeout(20000),
+    const head = await fetch(COMMIT_API, {
+      headers: { 'User-Agent': 'kib0-bootstrap' },
+      signal: AbortSignal.timeout(15000),
     })
-    if (res.ok) {
-      const rows = await res.json()
-      const row = rows.find((r) => r.id === 'bundle')
-      if (ok(row?.payload)) return { bundle: row.payload, from: 'cloud' }
+    if (head.ok) {
+      const { sha } = await head.json()
+      if (sha) {
+        const res = await fetch(CDN_BY_COMMIT(sha), { signal: AbortSignal.timeout(60000) })
+        if (res.ok) {
+          const b = await res.json()
+          if (ok(b)) return { bundle: b, from: 'cdn' }
+        }
+      }
     }
   } catch (e) {
-    console.log(`[自举] 云数据库不可用：${e.message}`)
+    console.log(`[自举] commit CDN 不可用：${e.message}`)
   }
 
-  // 2) GitHub API（走 api.github.com，比 RAW 域名稳；内容包超过 1MB 需 raw media type）
+  // 2) GitHub API（带 token，内容包超过 1MB 需 raw media type）
   if (token) {
     try {
       const res = await fetch(API, {
@@ -62,9 +72,24 @@ async function getBundle() {
     }
   }
 
-  // 3) RAW 最后兜底（国内可能极慢，给足 90 秒）
+  // 3) 云数据库（旧数据风险高，放在后面，且恢复前还会做防倒退校验）
   try {
-    const res = await fetch(`${URL}?t=${Date.now()}`, { signal: AbortSignal.timeout(90000) })
+    const res = await fetch(CLOUD, {
+      headers: { 'x-wb-webapp-access-key': KEY },
+      signal: AbortSignal.timeout(20000),
+    })
+    if (res.ok) {
+      const rows = await res.json()
+      const row = rows.find((r) => r.id === 'bundle')
+      if (ok(row?.payload)) return { bundle: row.payload, from: 'cloud' }
+    }
+  } catch (e) {
+    console.log(`[自举] 云数据库不可用：${e.message}`)
+  }
+
+  // 4) RAW 最后兜底（国内可能极慢，给足 90 秒）
+  try {
+    const res = await fetch(`${RAW_URL}?t=${Date.now()}`, { signal: AbortSignal.timeout(90000) })
     if (res.ok) {
       const b = await res.json()
       if (ok(b)) return { bundle: b, from: 'raw' }
@@ -79,6 +104,23 @@ async function getBundle() {
 const { bundle, from } = await getBundle()
 if (!bundle) {
   console.log('[自举] 没有可取的内容包，保留仓库自带数据继续')
+  process.exit(0)
+}
+
+// 防倒退：云库/缓存里可能残留几个月前的旧包，绝不能用它清空 src/data。
+function localLatestDate() {
+  try {
+    const files = readdirSync(join(DATA, 'issues')).filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f))
+    return files.map((f) => f.slice(0, 10)).sort().at(-1) ?? ''
+  } catch {
+    return ''
+  }
+}
+const localLatest = localLatestDate()
+if (localLatest && bundle.issues[0].date < localLatest) {
+  console.log(
+    `[自举] 取到的包 ${bundle.issues[0].date} 比本地 ${localLatest} 旧，拒绝恢复（防倒退）`,
+  )
   process.exit(0)
 }
 
@@ -130,8 +172,8 @@ console.log(
   `[自举] 来源=${from} · 恢复 ${bundle.issues.length} 期（最新 ${bundle.issues[0].date}）、${bundle.storylines?.length ?? 0} 个专题、${bundle.weekly?.issues?.length ?? 0} 期周报`,
 )
 
-// 顺手把原始包写到项目根：构建后置步骤会复制进 dist，让站点以「同源」为主通道，
-// 不必再依赖国内经常超时的 raw.githubusercontent.com。
+// 顺手把原始包写到项目根：构建后置步骤会复制进 dist，作为同源兜底副本。
+// 前端会并发比对所有通道并按期次择优，副本旧也压不过远端新包。
 try {
   writeFileSync(join(ROOT, 'live-bundle.json'), JSON.stringify(bundle), 'utf8')
 } catch (e) {

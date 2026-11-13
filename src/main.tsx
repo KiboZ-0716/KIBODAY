@@ -15,11 +15,11 @@ const render = () =>
 // 先用构建期数据立刻渲染：网络再慢、云端再不可用，也不会白屏。
 render()
 
-// 再去云端取最新一期（内部 2.5 秒超时，这里再加一层硬兜底）。
-// 拿到更新的内容就整体替换数据集并重新渲染 —— 每日出刊不需要重新部署站点。
+// 再去取最新一期：每发现一个更新的内容包就立刻整体替换并重渲染，
+// 不必等最慢的通道超时；每日出刊也不再依赖站点重新部署。
 const HARD_TIMEOUT = 10000
 const guarded = Promise.race([
-  loadRemoteContent(),
+  loadRemoteContent(() => render()),
   new Promise<null>((resolve) => setTimeout(() => resolve(null), HARD_TIMEOUT)),
 ])
 

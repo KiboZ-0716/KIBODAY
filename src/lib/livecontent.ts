@@ -3,33 +3,46 @@ import type { ContentBundle } from '@/data/types'
 import { getCloud, isDeepDiveReady } from './cloud'
 
 /**
- * 内容分两层：构建期打进 dist 的数据只是兜底；启动时拉「实时内容包」替换。
+ * 内容分发（2026-11-13 从头重写）
  *
- * 三条通道，按可靠性排序：
- * 1) 同源 ./live-bundle.json —— 每次发布站点时随 dist 一起上传，同域名必然可访问、通常几十毫秒返回；
- *    国内网络访问 raw.githubusercontent.com 经常要几分钟甚至超时，这条才是主通道。
- * 2) GitHub RAW —— 免重新部署，海外/可通网络下生效。
- * 3) 云数据库 —— 旧站通道，最后兜底。
- * 另外把上一次成功拿到的包存 localStorage，通道全部失败时先用它，避免读者看到隔夜内容。
+ * 唯一真源：仓库 main 分支的 live-bundle.json。
+ * 旧实现的事故链：站点 09:00 用「构建期旧副本」发布，内容包 09:57 才推上去；
+ * 前端又是「同源包优先、拿到就 return」，旧副本直接压过新包，远端通道连机会都没有；
+ * 加上云库在新域名未开通、GitHub RAW 国内超时，读者只能看到隔夜一期。
+ *
+ * 现在的原则：
+ *   1) 构建期数据、同源 dist 副本都只是兜底，绝不允许压过更新的远端包；
+ *   2) 所有通道并发赛跑，统一按「期次日期 + generatedAt」择优，谁最新用谁；
+ *   3) 每发现一个更新的包立即替换并重渲染，不必等最慢的通道超时；
+ *   4) 同源请求透传 sharecode（发布平台不带该参数会返回 403「链接不完整」）；
+ *   5) 远端走 GitHub HEAD commit 锁定的 jsDelivr 地址：@main 有 12 小时 CDN 缓存会串期，
+ *      @<commit> 永久缓存且随每次推送自动换地址，既实时又不会拿到昨天的包。
+ * 于是「站点有没有重新构建、定时任务几点跑」都不再影响打开是不是最新一期。
  */
 const TABLE = 'kib0_content'
 const ROW_ID = 'bundle'
-const SAME_ORIGIN_URL = './live-bundle.json'
-const LIVE_URL = 'https://raw.githubusercontent.com/KiboZ-0716/KIBODAY/main/live-bundle.json'
-/** 同源文件很小概率很慢，给它 3.5 秒；远端给 8 秒，绝不把首屏拖成十几秒 */
+const REPO = 'KiboZ-0716/KIBODAY'
+const SAME_ORIGIN = './live-bundle.json'
+const RAW_URL = `https://raw.githubusercontent.com/${REPO}/main/live-bundle.json`
+const COMMIT_API = `https://api.github.com/repos/${REPO}/commits/main`
+const CDN_BY_COMMIT = (sha: string) =>
+  `https://cdn.jsdelivr.net/gh/${REPO}@${sha}/live-bundle.json`
+const CDN_MAIN = `https://cdn.jsdelivr.net/gh/${REPO}@main/live-bundle.json`
+
 const SAME_ORIGIN_MS = 3500
-const REMOTE_MS = 8000
+const REMOTE_MS = 9000
 const CACHE_KEY = 'kib0:live-bundle:v1'
 
 export type LiveStatus = {
   source: 'cloud' | 'local'
   /** 实际生效的通道，?debug 时显示在页面上 */
-  channel: 'same-origin' | 'raw' | 'database' | 'cache' | 'baked'
+  channel: 'same-origin' | 'cdn' | 'raw' | 'database' | 'cache' | 'baked'
   date: string
   error?: string
+  /** ?debug 时展示：每个通道拿到的期次，一眼看出哪条链路滞后 */
+  channels?: Record<string, string>
 }
 
-/** 本次启动的内容来源，?debug 时显示在页面上，便于确认实时内容包是否真的生效 */
 let status: LiveStatus | null = null
 
 export function getContentStatus(): LiveStatus | null {
@@ -41,22 +54,22 @@ function looksUsable(bundle: unknown): bundle is ContentBundle {
   return !!b && Array.isArray(b.issues) && b.issues.length > 0 && !!b.issues[0].date
 }
 
-/** 内容包更旧（比如某天没出刊）就不要覆盖，避免内容倒退 */
-function accept(bundle: ContentBundle, baked: string): boolean {
-  return bundle.issues[0].date >= baked
+/** 期次优先；同期次再比生成时间。构建期数据没有 generatedAt，天然排最后 */
+function stamp(bundle: ContentBundle): string {
+  return `${bundle.issues[0].date}|${bundle.generatedAt ?? ''}`
 }
 
-async function fetchBundle(url: string, timeoutMs: number): Promise<ContentBundle | null> {
+async function fetchJson(url: string, timeoutMs: number): Promise<unknown | null> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {
-    const res = await fetch(`${url}${url.includes('?') ? '&' : '?'}t=${Date.now()}`, {
+    const sep = url.includes('?') ? '&' : '?'
+    const res = await fetch(`${url}${sep}t=${Date.now()}`, {
       signal: controller.signal,
       cache: 'no-store',
     })
     if (!res.ok) return null
-    const bundle = (await res.json()) as ContentBundle
-    return looksUsable(bundle) ? bundle : null
+    return await res.json()
   } catch {
     return null
   } finally {
@@ -64,14 +77,25 @@ async function fetchBundle(url: string, timeoutMs: number): Promise<ContentBundl
   }
 }
 
+async function fetchBundle(url: string, timeoutMs: number): Promise<ContentBundle | null> {
+  const data = await fetchJson(url, timeoutMs)
+  return looksUsable(data) ? data : null
+}
+
+/** GitHub HEAD → 按 commit 锁定的 CDN，绕开 @main 的 12 小时缓存 */
+async function fetchByCommit(timeoutMs: number): Promise<ContentBundle | null> {
+  const head = (await fetchJson(COMMIT_API, Math.min(timeoutMs, 4000))) as { sha?: string } | null
+  if (!head?.sha) return null
+  return fetchBundle(CDN_BY_COMMIT(head.sha), timeoutMs)
+}
+
 async function fetchDatabase(timeoutMs: number): Promise<ContentBundle | null> {
   if (!isDeepDiveReady()) return null
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {
-    const cloud = getCloud()
-    const { data, error } = await cloud.database
-      .from(TABLE)
+    const { data, error } = await getCloud()
+      .database.from(TABLE)
       .select('payload')
       .eq('id', ROW_ID)
       .abortSignal(controller.signal)
@@ -89,8 +113,7 @@ async function fetchDatabase(timeoutMs: number): Promise<ContentBundle | null> {
 function readCache(): ContentBundle | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY)
-    if (!raw) return null
-    const parsed = JSON.parse(raw) as ContentBundle
+    const parsed = raw ? (JSON.parse(raw) as ContentBundle) : null
     return looksUsable(parsed) ? parsed : null
   } catch {
     return null
@@ -105,51 +128,58 @@ function writeCache(bundle: ContentBundle) {
   }
 }
 
-function use(bundle: ContentBundle, channel: LiveStatus['channel']): LiveStatus {
-  applyBundle(bundle)
-  writeCache(bundle)
-  status = { source: 'cloud', channel, date: bundle.issues[0].date }
-  return status
+/** 发布平台对不带 sharecode 的静态资源请求返回 403，同源包必须透传 */
+function sameOriginUrl(): string {
+  if (typeof location === 'undefined') return SAME_ORIGIN
+  const share = new URLSearchParams(location.search).get('sharecode')
+  return share ? `${SAME_ORIGIN}?sharecode=${encodeURIComponent(share)}` : SAME_ORIGIN
 }
 
-export async function loadRemoteContent(): Promise<LiveStatus> {
+/**
+ * 并发赛跑 + 渐进择优。onBetter 在每发现一个更新的包时触发（立即重渲染），
+ * 所以 CDN 3 秒内返回就已经是最新一期，不必等 GitHub RAW 之类慢通道超时。
+ */
+export async function loadRemoteContent(onBetter?: () => void): Promise<LiveStatus> {
   const baked = issues[0]?.date ?? ''
+  const seen: Record<string, string> = { baked }
   const failed: string[] = []
+  let bestStamp = `${baked}|`
+  let bestChannel: LiveStatus['channel'] = 'baked'
+  let bestDate = baked
 
-  // 1) 同源包：发布站点时随 dist 上传，最稳最快
-  const sameOrigin = await fetchBundle(SAME_ORIGIN_URL, SAME_ORIGIN_MS)
-  if (sameOrigin && accept(sameOrigin, baked)) return use(sameOrigin, 'same-origin')
-  if (sameOrigin) failed.push('同源内容包比本地旧')
-  else failed.push('同源内容包未取到')
-
-  // 2) 上次成功缓存的包：先让页面看到最近一期，再尝试更新
-  const cached = readCache()
-  const cachedOk = !!cached && accept(cached, baked)
-  if (cached && cachedOk) applyBundle(cached)
-
-  // 3) GitHub RAW 与云数据库并行赛跑，谁先给出可用的就用谁
-  const [raw, db] = await Promise.all([
-    fetchBundle(LIVE_URL, REMOTE_MS),
-    fetchDatabase(REMOTE_MS),
-  ])
-  const candidates: Array<[ContentBundle | null, LiveStatus['channel']]> = [
-    [raw, 'raw'],
-    [db, 'database'],
-  ]
-  const usable = candidates
-    .filter(([b]) => b && accept(b as ContentBundle, baked))
-    .map(([b, ch]) => [b as ContentBundle, ch] as const)
-    .sort((a, b) => String(b[0].issues[0].date).localeCompare(String(a[0].issues[0].date)))
-
-  if (usable.length) return use(usable[0][0], usable[0][1])
-  if (!raw) failed.push('GitHub RAW 未取到')
-  if (!db) failed.push('云数据库未取到')
-
-  // 4) 全通道失败：缓存可用就用缓存，否则用构建期数据
-  if (cached && cachedOk) {
-    status = { source: 'cloud', channel: 'cache', date: cached.issues[0].date, error: failed.join('；') }
-    return status
+  function consider(bundle: ContentBundle | null, channel: LiveStatus['channel']) {
+    if (!bundle) {
+      failed.push(`${channel} 未取到`)
+      return
+    }
+    seen[channel] = bundle.issues[0].date
+    const s = stamp(bundle)
+    if (s <= bestStamp) return
+    bestStamp = s
+    bestChannel = channel
+    bestDate = bundle.issues[0].date
+    applyBundle(bundle)
+    if (channel !== 'cache') writeCache(bundle)
+    onBetter?.()
   }
-  status = { source: 'local', channel: 'baked', date: baked, error: failed.join('；') }
+
+  // 上次成功拿到的包先顶上，避免首屏闪回隔夜内容
+  consider(readCache(), 'cache')
+
+  await Promise.allSettled([
+    fetchBundle(sameOriginUrl(), SAME_ORIGIN_MS).then((b) => consider(b, 'same-origin')),
+    fetchByCommit(REMOTE_MS).then((b) => consider(b, 'cdn')),
+    fetchBundle(CDN_MAIN, REMOTE_MS).then((b) => consider(b, 'cdn')),
+    fetchBundle(RAW_URL, REMOTE_MS).then((b) => consider(b, 'raw')),
+    fetchDatabase(REMOTE_MS).then((b) => consider(b, 'database')),
+  ])
+
+  status = {
+    source: bestChannel === 'baked' ? 'local' : 'cloud',
+    channel: bestChannel,
+    date: bestDate,
+    channels: seen,
+    error: failed.length ? failed.join('；') : undefined,
+  }
   return status
 }

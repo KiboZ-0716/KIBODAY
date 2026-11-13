@@ -7,8 +7,10 @@ import { enrichStorylines } from './enrich.mjs'
 const ROOT = process.cwd()
 const DATA = join(ROOT, 'src', 'data')
 
-// 发布域名与 publishableKey 是一对：服务端按 Origin 精确校验，必须与应用域名一致
-const ENDPOINT = 'https://daily-hotspot-brief-88193.app.workbuddy.host'
+// 2026-11-13 修正：站点早已迁到 a564b245 域名，旧脚本还在往 old 域名的库里写，
+// 前端（在新域名）永远读不到 —— 这条通道形同虚设，正是「打开不是最新」的帮凶之一。
+// 现在统一写当前站点域名；同时它只是冗余通道，内容分发已由 GitHub + 同源包 + CDN 承担。
+const ENDPOINT = 'https://a564b245be247abf2.app.workbuddy.host'
 const PUBLISHABLE_KEY =
   'wbpk_U6IarWrMqRm6vY3hw9TgUI_yJz5JfbIEEXxjgiuI57Rducv50rno1EQ'
 const TABLE = 'kib0_content'
@@ -55,8 +57,9 @@ const text = await res.text()
 const kb = Math.round(JSON.stringify(bundle).length / 1024)
 
 if (!res.ok) {
-  console.error(`上传失败 HTTP ${res.status}: ${text.slice(0, 400)}`)
-  process.exit(1)
+  // 云库只是冗余通道：它写失败不该让整期出刊中断，也不该让读者看到旧内容。
+  console.warn(`[云库] 写入失败 HTTP ${res.status}: ${text.slice(0, 300)}（不影响出刊，内容分发已由 GitHub + 同源包 + CDN 承担）`)
+  process.exit(0)
 }
 
 const rows = JSON.parse(text)
