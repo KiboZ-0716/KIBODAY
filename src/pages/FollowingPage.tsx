@@ -25,9 +25,14 @@ export function FollowingPage() {
 
   const row = (storyline: typeof storylines[number], isTracked: boolean) => {
     const issue = getIssue(storyline.latestNo)
-    const node = issue
+    // 优先直接摆出「今日进展」：追踪清单的价值就是一眼看到最新结论，
+    // 不能拿某一期写死的 currentNode 去索引另一条专题的时间线。
+    const progress = (storyline.nodes ?? []).find(
+      (n) => String(n.time).includes('今日进展') && !/没有新的可核对进展/.test(n.title),
+    )
+    const node = progress ?? (issue
       ? storyline.nodes[Math.min(issue.currentNode, storyline.nodes.length - 1)]
-      : storyline.nodes[storyline.nodes.length - 1]
+      : storyline.nodes[storyline.nodes.length - 1])
     const isFresh = hasFreshProgress(storyline)
     return (
       <div className="archive-row" key={storyline.id} style={{ gridTemplateColumns: '110px minmax(0, 1fr) 170px auto' }}>

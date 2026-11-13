@@ -42,14 +42,7 @@ export function applyBundle(bundle: ContentBundle) {
   if (bundle.weekly) weekly = bundle.weekly
   if (bundle.topics?.length) topics = bundle.topics
   if (bundle.reports) reports = bundle.reports
-  storylines = (bundle.storylines ?? []).map((storyline) => {
-    const related = issues.filter((i) => i.storylineId === storyline.id)
-    return {
-      ...storyline,
-      issueNos: related.map((i) => i.no),
-      latestNo: related[0]?.no ?? latestIssue.no,
-    }
-  })
+  storylines = (bundle.storylines ?? []).map(attachIssues)
 }
 
 export function getWeekly(id?: string): WeeklyIssue {
@@ -69,14 +62,22 @@ export function getIssueNeighbours(no: number): { prev?: Issue; next?: Issue } {
   }
 }
 
-export let storylines: StorylineWithIssues[] = rawStorylines.map((storyline) => {
-  const related = issues.filter((i) => i.storylineId === storyline.id)
+/**
+ * 一条专题关联哪些期次：既看当期是否把它设为主线，也看 enrich.mjs 补齐的
+ * 跨期日期。只认 storylineId 会让续报后的旧专题永远显示诞生那期的期号，
+ * 追踪列表右侧也会停在最老的节点上（2026-11-13 事故）。
+ */
+function attachIssues(storyline: Storyline): StorylineWithIssues {
+  const dates = new Set(storyline.relatedDates ?? [])
+  const related = issues.filter((i) => dates.has(i.date) || i.storylineId === storyline.id)
   return {
     ...storyline,
     issueNos: related.map((i) => i.no),
-    latestNo: related[0]?.no ?? latestIssue.no,
+    latestNo: related[0]?.no ?? (storyline as StorylineWithIssues).latestNo ?? latestIssue.no,
   }
-})
+}
+
+export let storylines: StorylineWithIssues[] = rawStorylines.map(attachIssues)
 
 export function getStoryline(id: string): StorylineWithIssues | undefined {
   return storylines.find((s) => s.id === id)
