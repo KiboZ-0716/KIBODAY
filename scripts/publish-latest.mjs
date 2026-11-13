@@ -16,7 +16,8 @@ import { join } from 'node:path'
 
 const ROOT = process.cwd()
 const REPO = 'KiboZ-0716/KIBODAY'
-const COMMIT_API = `https://api.github.com/repos/${REPO}/commits/main`
+// 按「内容包最后一次提交」锁定，源码推送不会扰动这条地址
+const BUNDLE_COMMIT_API = `https://api.github.com/repos/${REPO}/commits?path=live-bundle.json&per_page=1`
 const HOST = 'a564b245be247abf2.app.workbuddy.host'
 const SHARECODE = '2UZTFZ4OPU'
 const PUBLISH_JS = '/root/.codebuddy/skills/sites/scripts/publish.js'
@@ -50,20 +51,51 @@ function githubJson(url, timeoutMs) {
 }
 
 async function latestBundle() {
-  const head = await githubJson(COMMIT_API, 20000)
-  if (!head?.sha) throw new Error('拿不到 GitHub HEAD commit sha')
-  // @main 有 12 小时 CDN 缓存，会串期；@commit 永久缓存且随每次推送换地址
-  const url = `https://cdn.jsdelivr.net/gh/${REPO}@${head.sha}/live-bundle.json`
-  const res = await fetch(url, {
-    signal: AbortSignal.timeout(90000),
-    headers: { 'User-Agent': 'kib0-publisher' },
-  })
-  if (!res.ok) throw new Error(`CDN HTTP ${res.status}`)
-  const bundle = await res.json()
-  if (!Array.isArray(bundle.issues) || bundle.issues.length === 0) {
-    throw new Error('实时内容包为空')
+  const head = await githubJson(BUNDLE_COMMIT_API, 20000)
+  const sha = Array.isArray(head) ? head[0]?.sha : head?.sha
+  if (!sha) throw new Error('拿不到内容包的最后一次 commit sha')
+
+  // 两条通道互为备用：CDN 偶尔抖动/超时时，GitHub API（带 token）仍能拿到同一份包。
+  const fetchers = [
+    async () => {
+      // @main 有 12 小时 CDN 缓存会串期；@commit 永久缓存且随每次推包换地址
+      const url = `https://cdn.jsdelivr.net/gh/${REPO}@${sha}/live-bundle.json`
+      const res = await fetch(url, {
+        signal: AbortSignal.timeout(45000),
+        headers: { 'User-Agent': 'kib0-publisher' },
+      })
+      if (!res.ok) throw new Error(`CDN HTTP ${res.status}`)
+      return { bundle: await res.json(), from: 'cdn' }
+    },
+    async () => {
+      const res = await fetch(
+        `https://api.github.com/repos/${REPO}/contents/live-bundle.json?ref=main`,
+        {
+          headers: {
+            Accept: 'application/vnd.github.raw+json',
+            'User-Agent': 'kib0-publisher',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          signal: AbortSignal.timeout(90000),
+        },
+      )
+      if (!res.ok) throw new Error(`GitHub API HTTP ${res.status}`)
+      return { bundle: await res.json(), from: 'api' }
+    },
+  ]
+
+  for (const run of fetchers) {
+    try {
+      const { bundle, from } = await run()
+      if (Array.isArray(bundle?.issues) && bundle.issues.length > 0) {
+        console.log(`[发布] 内容包来源=${from} · 最新一期 ${bundle.issues[0].date}`)
+        return bundle
+      }
+    } catch (error) {
+      console.log(`[发布] 通道失败，换下一条：${error.message}`)
+    }
   }
-  return bundle
+  throw new Error('所有内容包通道都取不到包')
 }
 
 const stamp = (b) => `${b.issues?.[0]?.date ?? ''}|${b.generatedAt ?? ''}`

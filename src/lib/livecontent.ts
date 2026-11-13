@@ -15,7 +15,7 @@ import { getCloud, isDeepDiveReady } from './cloud'
  *   2) 所有通道并发赛跑，统一按「期次日期 + generatedAt」择优，谁最新用谁；
  *   3) 每发现一个更新的包立即替换并重渲染，不必等最慢的通道超时；
  *   4) 同源请求透传 sharecode（发布平台不带该参数会返回 403「链接不完整」）；
- *   5) 远端走 GitHub HEAD commit 锁定的 jsDelivr 地址：@main 有 12 小时 CDN 缓存会串期，
+ *   5) 远端走「内容包最后一次提交」锁定的 jsDelivr 地址：@main 有 12 小时 CDN 缓存会串期，
  *      @<commit> 永久缓存且随每次推送自动换地址，既实时又不会拿到昨天的包。
  * 于是「站点有没有重新构建、定时任务几点跑」都不再影响打开是不是最新一期。
  */
@@ -24,7 +24,9 @@ const ROW_ID = 'bundle'
 const REPO = 'KiboZ-0716/KIBODAY'
 const SAME_ORIGIN = './live-bundle.json'
 const RAW_URL = `https://raw.githubusercontent.com/${REPO}/main/live-bundle.json`
-const COMMIT_API = `https://api.github.com/repos/${REPO}/commits/main`
+// 查「内容包最后一次提交」而不是 HEAD：源码推送会频繁改 HEAD，但内容包没变，
+// CDN 地址保持稳定；只有每天出刊推包时才会换，且那时 CDN 早已就绪。
+const BUNDLE_COMMIT_API = `https://api.github.com/repos/${REPO}/commits?path=live-bundle.json&per_page=1`
 const CDN_BY_COMMIT = (sha: string) =>
   `https://cdn.jsdelivr.net/gh/${REPO}@${sha}/live-bundle.json`
 const CDN_MAIN = `https://cdn.jsdelivr.net/gh/${REPO}@main/live-bundle.json`
@@ -82,11 +84,15 @@ async function fetchBundle(url: string, timeoutMs: number): Promise<ContentBundl
   return looksUsable(data) ? data : null
 }
 
-/** GitHub HEAD → 按 commit 锁定的 CDN，绕开 @main 的 12 小时缓存 */
+/** 内容包最后一次提交 → 按 commit 锁定的 CDN，绕开 @main 的 12 小时缓存 */
 async function fetchByCommit(timeoutMs: number): Promise<ContentBundle | null> {
-  const head = (await fetchJson(COMMIT_API, Math.min(timeoutMs, 4000))) as { sha?: string } | null
-  if (!head?.sha) return null
-  return fetchBundle(CDN_BY_COMMIT(head.sha), timeoutMs)
+  const head = (await fetchJson(BUNDLE_COMMIT_API, Math.min(timeoutMs, 4000))) as
+    | Array<{ sha?: string }>
+    | { sha?: string }
+    | null
+  const sha = Array.isArray(head) ? head[0]?.sha : head?.sha
+  if (!sha) return null
+  return fetchBundle(CDN_BY_COMMIT(sha), timeoutMs)
 }
 
 async function fetchDatabase(timeoutMs: number): Promise<ContentBundle | null> {

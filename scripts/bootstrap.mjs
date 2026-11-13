@@ -12,8 +12,8 @@ const ROOT = process.cwd()
 const DATA = join(ROOT, 'src', 'data')
 const REPO = 'KiboZ-0716/KIBODAY'
 // 唯一真源 = 仓库 main 的 live-bundle.json。@main 的 CDN 缓存 12 小时会串期，
-// 所以按 GitHub HEAD commit 锁定地址；云库只作最后兜底（旧域名/旧数据不再优先）。
-const COMMIT_API = `https://api.github.com/repos/${REPO}/commits/main`
+// 所以按「内容包最后一次提交」锁定地址；云库只作最后兜底（旧数据不再优先）。
+const BUNDLE_COMMIT_API = `https://api.github.com/repos/${REPO}/commits?path=live-bundle.json&per_page=1`
 const CDN_BY_COMMIT = (sha) => `https://cdn.jsdelivr.net/gh/${REPO}@${sha}/live-bundle.json`
 const API = `https://api.github.com/repos/${REPO}/contents/live-bundle.json?ref=main`
 const RAW_URL = `https://raw.githubusercontent.com/${REPO}/main/live-bundle.json`
@@ -34,12 +34,13 @@ async function getBundle() {
 
   // 1) 按 commit 锁定的 CDN：唯一真源、免 token、2—3 秒，且不会拿到缓存里的昨天
   try {
-    const head = await fetch(COMMIT_API, {
+    const head = await fetch(BUNDLE_COMMIT_API, {
       headers: { 'User-Agent': 'kib0-bootstrap' },
       signal: AbortSignal.timeout(15000),
     })
     if (head.ok) {
-      const { sha } = await head.json()
+      const info = await head.json()
+      const sha = Array.isArray(info) ? info[0]?.sha : info?.sha
       if (sha) {
         const res = await fetch(CDN_BY_COMMIT(sha), { signal: AbortSignal.timeout(60000) })
         if (res.ok) {
