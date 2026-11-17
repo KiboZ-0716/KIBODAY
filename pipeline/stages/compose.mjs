@@ -1,5 +1,6 @@
 import { clamp, weekdayCn } from '../lib.mjs'
 import { importanceScore, importanceReason, focusScore } from '../importance.mjs'
+import { tightenHeadline, tightenLeadTitle } from '../bigtitles.mjs'
 
 /**
  * 编排成刊：把核验后的事件 + 编辑意图（brief）拼成站点消费的 Issue。
@@ -114,18 +115,24 @@ export function compose({ source, brief, assets, no }) {
       `全篇 ${stats.fetched} 条原始素材，剔除通稿后留下 ${stats.events} 个可核对事件`,
     )
 
+  // 两个大标题的硬闸门：模型若又写成「整期目录 / 数字堆砌」，出刊前强制收敛。
+  // 注意下面的去重锚点（buildTopAnchors）与配图（pickCoverKeys）仍用原始 brief 标题，
+  // 信息不丢；这里只约束最终展示给读者的大字标题。规范见 style-guide 第七条补充一。
+  const bigHeadline = tightenHeadline(brief.headline, { label: source.date })
+  const bigLeadTitle = tightenLeadTitle(brief.lead?.title, { label: source.date })
+
   return {
     no,
     date: source.date,
     weekday: weekdayCn(source.date),
     window: source.window,
     generatedAt: brief.generatedAt ?? addMinutes(leadEvent.time, 38),
-    headline: brief.headline,
+    headline: bigHeadline.value,
     stats,
     synthesis,
     lead: {
       kicker: brief.lead.kicker,
-      title: brief.lead.title,
+      title: bigLeadTitle.value,
       dek: brief.lead.dek,
       image: mediaPath(assets, coverKeys ? coverKeys[0] : brief.lead.imageKey, 'lg'),
       credit: 'K!B0 图库',
