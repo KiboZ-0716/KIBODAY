@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
 const KEYS = {
-  following: 'kib0.following',
   city: 'kib0.city',
   lastIssue: 'kib0.lastIssue',
 } as const
@@ -21,23 +20,6 @@ function write(key: string, value: unknown) {
   } catch {
     /* 隐私模式下写入会失败，静默降级为仅本次会话有效 */
   }
-}
-
-/** 追踪事件，落 localStorage，跨期次与刷新都保留 */
-export function useFollowing() {
-  const [ids, setIds] = useState<string[]>(() => read<string[]>(KEYS.following, []))
-
-  const toggle = useCallback((id: string) => {
-    setIds((current) => {
-      const next = current.includes(id) ? current.filter((x) => x !== id) : [...current, id]
-      write(KEYS.following, next)
-      return next
-    })
-  }, [])
-
-  const isFollowing = useCallback((id: string) => ids.includes(id), [ids])
-
-  return { ids, toggle, isFollowing }
 }
 
 /** 关注城市 */

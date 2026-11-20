@@ -38,7 +38,6 @@ export function SiteFooter() {
         <div className="footer-links">
           <Link to="/archive">往期日报</Link>
           <Link to="/ai-weekly">AI 周报</Link>
-          <Link to="/following">我的追踪</Link>
           <button onClick={openSearch}>搜索全站</button>
         </div>
       </div>

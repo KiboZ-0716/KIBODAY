@@ -65,7 +65,7 @@ export function getIssueNeighbours(no: number): { prev?: Issue; next?: Issue } {
 /**
  * 一条专题关联哪些期次：既看当期是否把它设为主线，也看 enrich.mjs 补齐的
  * 跨期日期。只认 storylineId 会让续报后的旧专题永远显示诞生那期的期号，
- * 追踪列表右侧也会停在最老的节点上（2026-11-13 事故）。
+ * 事件脉络也会停在最老的节点上（2026-11-13 事故）。
  */
 function attachIssues(storyline: Storyline): StorylineWithIssues {
   const dates = new Set(storyline.relatedDates ?? [])

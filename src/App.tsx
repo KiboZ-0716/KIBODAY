@@ -10,7 +10,6 @@ import { AnalysisPage } from '@/pages/AnalysisPage'
 import { ReportPage } from '@/pages/ReportPage'
 import { StorylinePage } from '@/pages/StorylinePage'
 import { SearchPage } from '@/pages/SearchPage'
-import { FollowingPage } from '@/pages/FollowingPage'
 import { WeeklyPage } from '@/pages/WeeklyPage'
 import { Link } from 'react-router-dom'
 
@@ -31,7 +30,6 @@ export default function App() {
           <Route path="/storyline/:id" element={<StorylinePage />} />
           <Route path="/archive" element={<ArchivePage />} />
           <Route path="/search" element={<SearchPage />} />
-          <Route path="/following" element={<FollowingPage />} />
           <Route path="/ai-weekly" element={<WeeklyPage />} />
           <Route path="/ai-weekly/:id" element={<WeeklyPage />} />
           <Route path="*" element={<NotFound />} />
@@ -44,8 +42,8 @@ export default function App() {
 /**
  * 路由切换统一回到顶部。
  * 之前只有首页、周报页各自做，其余页面会沿用上一页的滚动位置；
- * 从首页底部点「追踪管理」时，新页高度更矮，scrollY 被裁到文档底部，
- * 读者一进去就看到页尾。用 layout effect 在绘制前归零，避免闪一下。
+ * 从底部点进高度更矮的新页时，scrollY 会被裁到文档底部，读者一进去就看到页尾。
+ * 用 layout effect 在绘制前归零，避免闪一下。
  * 只认 pathname：页内筛选（?tag= / ?q=）与锚点跳转不触发。
  */
 function ScrollToTop() {

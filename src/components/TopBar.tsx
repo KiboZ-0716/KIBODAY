@@ -12,7 +12,6 @@ type Props = {
 const NAV = [
   { to: '/', label: '今日', match: (p: string) => p.startsWith('/issue') || p === '/' },
   { to: '/archive', label: '往期', match: (p: string) => p === '/archive' },
-  { to: '/following', label: '追踪', match: (p: string) => p === '/following' },
 ]
 
 export function TopBar({

@@ -22,7 +22,8 @@ function duplicate(a: string, b: string) {
   return hit / Math.min(A.size, B.size) > 0.72
 }
 
-export function BriefsSection({ issue, limit = 6 }: { issue: Issue; limit?: number }) {
+/** 本期速览：所有新闻直接在首页外层平铺，不再折叠进「查看全部」详情列表页 */
+export function BriefsSection({ issue }: { issue: Issue }) {
   // 「与你有关」已经展开的条目不再出现在「本期速览」，两个版块不重复
   const regionalTitles = (issue.regional?.cities ?? []).flatMap((c) =>
     (c.items ?? []).map((i) => normalize(i.title)),
@@ -30,23 +31,13 @@ export function BriefsSection({ issue, limit = 6 }: { issue: Issue; limit?: numb
   const briefs = issue.briefs.filter(
     (b) => !regionalTitles.some((r) => duplicate(r, normalize(b.title))),
   )
-  const shown = briefs.slice(0, limit)
 
   return (
     <section className="section-block">
-      <SectionHeading
-        index="01"
-        title="本期速览"
-        en="DAILY BRIEFING"
-        action={
-          <Link to={`/issue/${issue.no}/briefs`}>
-            查看全部 {briefs.length} 条 <Icon name="arrow" />
-          </Link>
-        }
-      />
+      <SectionHeading index="01" title="本期速览" en="DAILY BRIEFING" />
 
       <div className="news-list">
-        {shown.map((brief) => (
+        {briefs.map((brief) => (
           <div className="news-row news-row--rich" key={`${brief.time}-${brief.title}`}>
             <div>
               <span className="topic-tag">{brief.tag}</span>
@@ -65,11 +56,6 @@ export function BriefsSection({ issue, limit = 6 }: { issue: Issue; limit?: numb
             <span className="row-actions">
               <Link to={`/report/${brief.id}`} title="生成该事件的深度报告">
                 <Icon name="search" /> 深挖
-              </Link>
-              <Link to={`/issue/${issue.no}/briefs?tag=${encodeURIComponent(brief.tag)}`}>
-                <span className="row-arrow">
-                  <Icon name="arrow" />
-                </span>
               </Link>
             </span>
           </div>

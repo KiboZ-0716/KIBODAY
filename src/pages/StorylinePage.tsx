@@ -1,7 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import { getStoryline, issues, pad } from '@/data'
 import type { Storyline } from '@/data'
-import { useFollowing } from '@/lib/hooks'
 import { PageShell } from '@/components/PageShell'
 import { MediaImage } from '@/components/MediaImage'
 import { Icon } from '@/components/Icon'
@@ -56,7 +55,6 @@ function fallbackStoryline(rawId: string): Storyline | undefined {
 export function StorylinePage() {
   const { id } = useParams()
   const storyline = (id ? getStoryline(id) : undefined) ?? (id ? fallbackStoryline(id) : undefined)
-  const { isFollowing, toggle } = useFollowing()
 
   if (!storyline) {
     return (
@@ -79,7 +77,6 @@ export function StorylinePage() {
   )
   const currentIssue = related[0]
   const currentNode = Math.min(currentIssue?.currentNode ?? storyline.nodes.length - 1, storyline.nodes.length - 1)
-  const followed = isFollowing(storyline.id)
   const hasDeep = !!(
     storyline.background ||
     storyline.mechanism ||
@@ -129,14 +126,6 @@ export function StorylinePage() {
           {storyline.updatedAt && (
             <p style={{ fontSize: 13, opacity: 0.7, margin: '8px 0 0' }}>更新至 {storyline.updatedAt}</p>
           )}
-          <button
-            className={followed ? 'follow active' : 'follow'}
-            onClick={() => toggle(storyline.id)}
-            aria-pressed={followed}
-            style={{ alignSelf: 'flex-start' }}
-          >
-            <Icon name="bookmark" /> {followed ? '已追踪' : '追踪事件'}
-          </button>
         </div>
       </div>
 
@@ -321,7 +310,7 @@ export function StorylinePage() {
               <b>荧光笔加粗</b>是关键判断，<b style={{ color: 'var(--red)' }}>红色数字</b>是可核对的量，带「判断：」的句子是推论而非事实。赶时间可以先只看这些标记。
             </p>
             <p className="rail-intro">
-              事件脉络只记录已确认的事实节点。点「追踪事件」后，这条事件才进入「我的追踪」，之后每天汇总新进展；不追踪则不特别跟踪。
+              事件脉络只记录已确认的事实节点，按时间由近到远排列；同一件事的后续报道会补进新的节点。
             </p>
           </section>
         </aside>

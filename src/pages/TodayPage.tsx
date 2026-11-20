@@ -7,7 +7,6 @@ import { PageShell } from '@/components/PageShell'
 import { IssueHeader } from '@/components/IssueHeader'
 import { TopStoriesSection } from '@/components/TopStoriesSection'
 import { BriefsSection } from '@/components/BriefsSection'
-import { TimelineSection } from '@/components/TimelineSection'
 import { RegionalSection } from '@/components/RegionalSection'
 import { ArchiveSection } from '@/components/ArchiveSection'
 
@@ -29,7 +28,6 @@ export function TodayPage() {
       <div className="content-grid">
         <div className="main-column">
           <BriefsSection issue={issue} />
-          <TimelineSection issue={issue} />
         </div>
       </div>
 
